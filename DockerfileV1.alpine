@@ -8,7 +8,7 @@ FROM alpine:3.13.5 as prep
 ARG LIBGPIOD_VERSION=1.6.3
 
 RUN apk update && apk upgrade
-RUN apk add curl autoconf automake autoconf-archive libtool pkgconfig tar zip
+RUN apk add curl autoconf automake autoconf-archive libtool pkgconfig tar
 RUN apk add gawk mawk build-base gcc make g++ zlib-dev linux-headers
 
 RUN mkdir -p /libgpiod \
@@ -25,18 +25,11 @@ RUN cd /libgpiod/libgpiod-$LIBGPIOD_VERSION \
 	&& make \
 	&& make install
 #
-RUN cp /usr/share/libgpiod/bin/gpio* /usr/bin/ \
-	&& cp /usr/share/libgpiod/lib/libgpiod* /usr/lib/ \
-	&& zip -r9 /artifacts.zip /usr/bin/gpio* /usr/lib/libgpiod*
 FROM alpine:3.13.5
 MAINTAINER DevDotNet.Org <anton@devdotnet.org>
 LABEL maintainer="DevDotNet.Org <anton@devdotnet.org>"
 
-COPY --from=prep /artifacts.zip /
-
-RUN apk update \
-	&& apk add --no-cache --upgrade zip \
-	&& unzip -o /artifacts.zip -d / \
-	&& apk del zip
+COPY --from=prep /usr/share/libgpiod/bin/* /usr/bin/
+COPY --from=prep /usr/share/libgpiod/lib/lib* /usr/lib/
 
 CMD ["/usr/bin/gpioinfo", "-v"]
