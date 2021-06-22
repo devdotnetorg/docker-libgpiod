@@ -1,5 +1,10 @@
 # Alpine image with [Libgpiod][1] library for control GPIO Developer boards such as Raspberry Pi, Banana Pi, Orange Pi, and etc. 
 
+#### Upstream Links
+
+* Docker Registry @ [devdotnetorg/libgpiod](https://hub.docker.com/r/devdotnetorg/libgpiod)
+* GitHub @ [devdotnetorg/docker-libgpiod](https://github.com/devdotnetorg/docker-libgpiod)
+
 ## Image Tags ##
 
 ### Linux arm64 Tags ###
@@ -28,7 +33,7 @@ Internally, the Linux kernel implements the access to GPIOs via a producer/consu
 
 To manage the GPIO registration and allocation there is a framework inside the Linux kernel called gpiolib. This framework provides an API to both device drivers running in kernel space and user space applications.
 
-gpiolib.png
+![Image of Midnight Commander](https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/master/Images/gpiolib.png)
 
 ## Libgpiod
 
@@ -36,8 +41,8 @@ Since Linux version 4.8 the GPIO sysfs interface is deprecated, and now we have 
 
 Every GPIO controller (gpiochip) will have a character device in /dev and we can use file operations (open(), read(), write(), ioctl(), poll(), close()) to manage and interact with GPIO lines:
 
-root@bananapim64:~# ls /dev/gpiochip*
-/dev/gpiochip0  /dev/gpiochip1  /dev/gpiochip2
+	root@bananapim64:~# ls /dev/gpiochip*
+	/dev/gpiochip0  /dev/gpiochip1  /dev/gpiochip2
 
 Although this new char device interface prevents manipulating GPIO with standard command-line tools like echo and cat, it has some advantages when compared to the sysfs interface, including:
 
@@ -58,205 +63,91 @@ Libgpiod (Library General Purpose Input/Output device)  provides both API calls 
 - gpiofind – find the gpiochip name and line offset given the line name
 - gpiomon – wait for events on GPIO lines, specify which events to watch, how many events to process before exiting or if the events should be reported to the console
 
-gpiodetect
+**gpiodetect**
 
-root@bananapim64:~# gpiodetect
-gpiochip0 [1f02c00.pinctrl] (32 lines)
-gpiochip1 [1c20800.pinctrl] (256 lines)
-gpiochip2 [axp20x-gpio] (2 lines)
+	root@bananapim64:~# gpiodetect
+	gpiochip0 [1f02c00.pinctrl] (32 lines)
+	gpiochip1 [1c20800.pinctrl] (256 lines)
+	gpiochip2 [axp20x-gpio] (2 lines)
 
- gpioinfo
+ **gpioinfo**
  
- root@bananapim64:~# gpioinfo 1
-gpiochip1 - 256 lines:
-        line   0:      unnamed       unused   input  active-high
-...
-        line  64:      unnamed         "dc"  output  active-high [used]
-...
-        line  68:      unnamed "backlightlcdtft" output active-high [used]
-...
-        line  96:      unnamed   "spi0 CS0"  output   active-low [used]
-        line  97:      unnamed       unused   input  active-high
-        line  98:      unnamed       unused   input  active-high
-        line  99:      unnamed       unused   input  active-high
-        line 100:      unnamed      "reset"  output   active-low [used]
-...
-        line 120:      unnamed "bananapi-m64:red:pwr" output active-high [used]
-...
-        line 254:      unnamed       unused   input  active-high
-        line 255:      unnamed       unused   input  active-high
-		
-		
-		
-		
+	root@bananapim64:~# gpioinfo 1
+	gpiochip1 - 256 lines:
+	        line   0:      unnamed       unused   input  active-high
+	...
+	        line  64:      unnamed         "dc"  output  active-high [used]
+	...
+	        line  68:      unnamed "backlightlcdtft" output active-high [used]
+	...
+	        line  96:      unnamed   "spi0 CS0"  output   active-low [used]
+	        line  97:      unnamed       unused   input  active-high
+	        line  98:      unnamed       unused   input  active-high
+	        line  99:      unnamed       unused   input  active-high
+	        line 100:      unnamed      "reset"  output   active-low [used]
+	...
+	        line 120:      unnamed "bananapi-m64:red:pwr" output active-high [used]
+	...
+	        line 254:      unnamed       unused   input  active-high
+	        line 255:      unnamed       unused   input  active-high
 
- gpiomon
- 
- root@bananapim64:~# gpiomon 1 38
-event:  RISING EDGE offset: 38 timestamp: [     122.943878429]
-event: FALLING EDGE offset: 38 timestamp: [     132.286218099]
-event:  RISING EDGE offset: 38 timestamp: [     137.639045559]
-event: FALLING EDGE offset: 38 timestamp: [     138.917400584]
+**gpiomon**
 
+	root@bananapim64:~# gpiomon 1 38
+	event:  RISING EDGE offset: 38 timestamp: [     122.943878429]
+	event: FALLING EDGE offset: 38 timestamp: [     132.286218099]
+	event:  RISING EDGE offset: 38 timestamp: [     137.639045559]
+	event: FALLING EDGE offset: 38 timestamp: [     138.917400584]
 
+## Quick Start
 
+The container needs to be run on a development board such as Raspberry Pi, Banana Pi, Orange Pi, and etc. You must give access to `/dev/gpiochipX`. If the pin you are using is in `gpiochip1`, then there is no need to give access to `gpiochip0`. 
 
-## Run
+Running **gpiodetect** on Banana Pi M64 (ARM64):
 
-За пускать контейнер небходимо на разработачной плате such as Raspberry Pi, Banana Pi, Orange Pi, and etc. Вы должны дать доступ к /dev/gpiochipX. Если используемый контакт находится в gpiochip1, то нет необходимости давать доступ к gpiochip0.
+`docker run --rm --name test-libgpiod --device /dev/gpiochip1 devdotnetorg/libgpiod gpiodetect`
 
-Запуск gpiodetect:
+Output:
 
-Включение светодиода LED на плате Banana Pi BPM  M 64:
+	gpiochip1 [1c20800.pinctrl] (256 lines)
 
-Литуратура на русском языке
+`docker run --rm --name test-libgpiod -v /dev/gpiochip0:/dev/gpiochip0 -v /dev/gpiochip1:/dev/gpiochip1 -v /dev/gpiochip2:/dev/gpiochip2 devdotnetorg/libgpiod gpiodetect`
 
-Литуература
+output:
 
+	gpiochip0 [1f02c00.pinctrl] (32 lines)
+	gpiochip1 [1c20800.pinctrl] (256 lines)
+	gpiochip2 [axp20x-gpio] (2 lines)
 
- 
- 
- - L2TP/IPSec PSK + OpenVPN
- - SecureNAT enabled
- - Perfect Forward Secrecy (DHE-RSA-AES256-SHA)
- - make'd from [the official SoftEther VPN GitHub Stable Edition Repository][2].
+`docker run --rm --name test-libgpiod --device /dev/gpiochip1 devdotnetorg/libgpiod gpiodetect -v`
 
-`docker run -d --cap-add NET_ADMIN -p 500:500/udp -p 4500:4500/udp -p 1701:1701/tcp -p 1194:1194/udp -p 5555:5555/tcp devdotnetorg/softethervpn-alpine`
+output:
 
-Connectivity tested on Android + iOS devices. It seems Android devices do not require L2TP server to have port 1701/tcp open.
+	gpiodetect (libgpiod) v1.6.3
+	Copyright (C) 2017-2018 Bartosz Golaszewski
+	License: LGPLv2.1
+	This is free software: you are free to change and redistribute it.
+	There is NO WARRANTY, to the extent permitted by law.
 
-The above example will accept connections from both L2TP/IPSec and OpenVPN clients at the same time.
+Running **gpioset**. Turning on LED on Banana Pi M64 (ARM64):
 
-Mix and match published ports: 
-- `-p 500:500/udp -p 4500:4500/udp -p 1701:1701/tcp` for L2TP/IPSec
-- `-p 1194:1194/udp` for OpenVPN.
-- `-p 443:443/tcp` for OpenVPN over HTTPS.
-- `-p 5555:5555/tcp` for SoftEther VPN (recommended by vendor).
-- `-p 992:992/tcp` is also available as alternative.
+`docker run --rm --name alpine-test-libgpiod --device /dev/gpiochip1 devdotnetorg/libgpiod gpioset 1 36=1`
 
-Any protocol supported by SoftEther VPN server is accepted at any open/published port (if VPN client allows non-default ports).
+## Links in Russian
 
-## Credentials
+- [Работа с GPIO в Linux. Часть 6. Библиотека Libgpiod](https://devdotnet.org/post/rabota-s-gpio-v-linux-chast-6-biblioteka-libgpiod/)
 
-All optional:
+## Links
 
-- `-e PSK`: Pre-Shared Key (PSK), if not set: "notasecret" (without quotes) by default.
-- `-e USERS`: Multiple usernames and passwords may be set with the following pattern: `username:password;user2:pass2;user3:pass3`. Username and passwords are separated by `:`. Each pair of `username:password` should be separated by `;`. If not set a single user account with a random username ("user[nnnn]") and a random weak password is created.
-- `-e SPW`: Server management password. :warning:
-- `-e HPW`: "DEFAULT" hub management password. :warning:
+- [Linux kernel GPIO user space interface — Sergio Prado embeddedbits.org](https://embeddedbits.org/new-linux-kernel-gpio-user-space-interface/)
 
-Single-user mode (usage of `-e USERNAME` and `-e PASSWORD`) is still supported.
+- [An Introduction to chardev GPIO and Libgpiod on the Raspberry PI — Craig Peacock BeyondLogic](https://www.beyondlogic.org/an-introduction-to-chardev-gpio-and-libgpiod-on-the-raspberry-pi/)
 
-See the docker log for username and password (unless `-e USERS` is set), which *would look like*:
-
-    # ========================
-    # user6301
-    # 2329.2890.3101.2451.9875
-    # ========================
-Dots (.) are part of the password. Password will not be logged if specified via `-e USERS`; use `docker inspect` in case you need to see it.
-
-:warning: if not set a random password will be set but not displayed nor logged. If specifying read the notice below.
-
-## Configurations ##
-
-The vpn_server.config configuration file has been moved from the binaries folder to the `/usr/vpnserver/config` subfolder for mounting.
-For the container to work, you need to create a file `vpn_server.config`, for this, start the container and specify the initial password for the server and the default hub:
-```
-$ docker run --name vpnconf -e SPW=<serverpw> -e HPW=<hubpw> -v softethervpn-config:/usr/vpnserver/config devdotnetorg/softethervpn-alpine echo
-$ docker rm vpnconf
-```
-The `vpn_server.config` file will be located at VOLUME:` softethervpn-config`.
-Now start the main container:
-```
-$ docker run ... -v softethervpn-config:/usr/vpnserver/config devdotnetorg/softethervpn-alpine
-```
-Refer to [SoftEther VPN Server Administration manual](https://www.softether.org/4-docs/1-manual/3._SoftEther_VPN_Server_Manual/3.3_VPN_Server_Administration) for more information.
-
-## Logging ##
-
-By default SoftEther has a very verbose logging system. For privacy or space constraints, this may not be desirable. The easiest way to solve this create a dummy volume to log to /dev/null. In your docker run you can use the following volume variables to remove logs entirely.
-```
--v /dev/null:/usr/vpnserver/server_log \
--v /dev/null:/usr/vpnserver/packet_log \
--v /dev/null:/usr/vpnserver/security_log
-```
-If logs are needed, then logs will accumulate over time. Added cron job for regular cleaning of logs. The cron job runs every 15 minutes. The environment `LIFETIMELOGS` controls the lifetime of the logs in hours.
-- (default) If `-e LIFETIMELOGS=0`, then the cron job does not start.
-- if `-e LIFETIMELOGS=2`, logs older than 2 hours will be deleted. But you need to remember that a new log file is created at 00:00 every day and recorded until 23:59:59, name: vpn_20201104.log, vpn_20201105.log, etc. Thus, the vpn_20201104.log file will be deleted on 05 November 2020, at 02: 00-02: 15 minutes. There will be daily accumulation of information, if you have not switched to the hourly mode of creating log files.
-
-Example: `docker run -d --cap-add NET_ADMIN -p 500:500/udp -p 4500:4500/udp -p 1701:1701/tcp -p 1194:1194/udp -p 5555:5555/tcp -e LIFETIMELOGS=2 devdotnetorg/softethervpn-alpine`
-
-YAML:
-```
-#VPN
-  softethervpn:
-    image: devdotnetorg/softethervpn-alpine
-    container_name: softethervpn_local
-    restart: always
-    ports:
-      - 992:992/tcp
-      - 1194:1194/udp
-      - 5555:5555/tcp
-      - 53:53/udp     
-      - 1195:1195/udp      
-    environment:
-      - LIFETIMELOGS=2
-    volumes:
-      - softethervpn-config:/usr/vpnserver/config
-      - softethervpn-logs-server:/usr/vpnserver/server_log      
-      - softethervpn-logs-packet:/usr/vpnserver/packet_log
-      - softethervpn-logs-security:/usr/vpnserver/security_log      
-    cap_add:
-      - NET_ADMIN    
-```
-
-## Server & Hub Management Commands ##
-
-Management commands can be executed just before the server & hub admin passwords are set via:
-- `-e VPNCMD_SERVER`: `;`-separated [Server management commands](https://www.softether.org/4-docs/1-manual/6._Command_Line_Management_Utility_Manual/6.3_VPN_Server_%2F%2F_VPN_Bridge_Management_Command_Reference_(For_Entire_Server)).
-- `-e VPNCMD_HUB`: `;`-separated [Hub management commands](https://www.softether.org/4-docs/1-manual/6._Command_Line_Management_Utility_Manual/6.4_VPN_Server_%2F%2F_VPN_Bridge_Management_Command_Reference_(For_Virtual_Hub)) (currently only for `DEFAULT` hub).
-
-Example: Set MTU via [`NatSet`](https://www.softether.org/4-docs/1-manual/6._Command_Line_Management_Utility_Manual/6.4_VPN_Server_%2F%2F_VPN_Bridge_Management_Command_Reference_(For_Virtual_Hub)#6.4.97_.22NatSet.22:_Change_Virtual_NAT_Function_Setting_of_SecureNAT_Function) Hub management command:
-`-e VPNCMD_HUB='NatSet /MTU:1500'`
-
-Note that commands run only if the config file is not mounted. Some commands (like `ServerPasswordSet`) will cause problems.
-
-## OpenVPN ##
-
-`docker run -d --cap-add NET_ADMIN -p 1194:1194/udp devdotnetorg/softethervpn-alpine`
-
-The entire log can be saved and used as an `.ovpn` config file (change as needed).
-
-Server CA certificate will be created automatically at runtime if it's not set. You can supply _a self-signed 1024-bit RSA certificate/key pair_ created locally OR use the `gencert` script described below. Feed the keypair contents via `-e CERT` and `-e KEY` ([use of `--env-file`][3] is recommended). X.509 markers (like `-----BEGIN CERTIFICATE-----`) and any non-BASE64 character (incl. newline) can be omitted and will be ignored.
-
-Examples (assuming bash; note the double-quotes `"` and backticks `` ` ``):
-
-* ``-e CERT="`cat server.crt`" -e KEY="`cat server.key`"``
-* `-e CERT="MIIDp..b9xA=" -e KEY="MIIEv..x/A=="`
-* `--env-file /path/to/envlist`
-
-`env-file` template can be generated by:
-
-`docker run --rm devdotnetorg/softethervpn-alpine gencert > /path/to/envlist`
-
-The output will have `CERT` and `KEY` already filled in. Modify `PSK`/`USERS`.
-
-Certificate volumes support (like `-v` or `--volumes-from`) will be added at some point...
-
-## Assembly for ARM devices ##
-
-The assembly for the aarch64 architecture (ARM64v8) was done on the [Banana Pi BPI-M64](http://wiki.banana-pi.org/Banana_Pi_BPI-M64) evaluation board.
-
-The assembly for the armhf architecture (ARM32v7) was done on the [Cubietruck](https://habr.com/ru/post/186576/) evaluation board.
-
-SoftEther VPN was compiled with musl option: `export USE_MUSL=YES`. [Build on musl-based linux](https://github.com/SoftEtherVPN/SoftEtherVPN/blob/master/src/BUILD_UNIX.md#build-on-musl-based-linux).
+- [Manage GPIO lines with gpiod — Sergio Tanzilli acmesystems.it](https://devdotnet.org/post/rabota-s-gpio-v-linux-chast-6-biblioteka-libgpiod/)
 
 ## License ##
 
-[MIT License][4].
+[MIT License][2].
 
   [1]: https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/
-  [2]: https://github.com/SoftEtherVPN/SoftEtherVPN_Stable
-  [3]: https://docs.docker.com/engine/reference/commandline/run/#set-environment-variables-e-env-env-file
-  [4]: https://github.com/devdotnetorg/docker-softethervpn-alpine/raw/master/LICENSE
- 
+  [2]: https://github.com/devdotnetorg/docker-libgpiod/raw/master/LICENSE
