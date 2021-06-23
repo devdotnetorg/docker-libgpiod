@@ -33,7 +33,7 @@ Internally, the Linux kernel implements the access to GPIOs via a producer/consu
 
 To manage the GPIO registration and allocation there is a framework inside the Linux kernel called gpiolib. This framework provides an API to both device drivers running in kernel space and user space applications.
 
-![Image of Midnight Commander](https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/master/Images/gpiolib.png)
+![Image of gpiolib](https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/master/Images/gpiolib.png)
 
 ## Libgpiod
 
