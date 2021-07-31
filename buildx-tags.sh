@@ -44,4 +44,15 @@ docker buildx build --platform linux/arm -f Dockerfile.focal --build-arg LIBGPIO
 #:all platform
 docker buildx build --platform linux/arm,linux/arm64,linux/amd64 -f Dockerfile.focal --build-arg LIBGPIOD_VERSION=1.6.3 -t devdotnetorg/libgpiod:1.6.3-focal . --push
 
+#Debian 10 buster 
+#------
+#:amd64
+#docker buildx build --platform linux/amd64 -f Dockerfile.buster --build-arg LIBGPIOD_VERSION=1.6.3 -t devdotnetorg/libgpiod:1.6.3-buster-amd64 . --push
+#:aarch64
+#docker buildx build --platform linux/arm64 -f Dockerfile.buster --build-arg LIBGPIOD_VERSION=1.6.3 -t devdotnetorg/libgpiod:1.6.3-buster-aarch64 . --push
+#:armhf
+#docker buildx build --platform linux/arm -f Dockerfile.buster --build-arg LIBGPIOD_VERSION=1.6.3 -t devdotnetorg/libgpiod:1.6.3-buster-armhf . --push
+#:all platform
+#docker buildx build --platform linux/arm,linux/arm64,linux/amd64 -f Dockerfile.buster --build-arg LIBGPIOD_VERSION=1.6.3 -t devdotnetorg/libgpiod:1.6.3-buster . --push
+
 echo "BUILDX END"
