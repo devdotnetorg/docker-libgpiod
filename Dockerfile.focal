@@ -1,0 +1,57 @@
+########################
+# Image Ubuntu with libgpiod
+# C library and tools for interacting with the linux GPIO character device
+########################
+
+FROM ubuntu:20.04 as prep
+
+ARG LIBGPIOD_VERSION=1.6.3
+
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends curl ca-certificates autoconf automake autoconf-archive libtool tar zip
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata \
+	&& dpkg-reconfigure --frontend noninteractive tzdata \
+	&& DEBIAN_FRONTEND=noninteractive apt-get install -y pkg-config
+
+RUN apt-get install -y --no-install-recommends gawk mawk gcc make g++ zlib1g-dev linux-headers-generic
+
+RUN mkdir -p /libgpiod \
+	&& cd /libgpiod \
+	&& curl -SL --output libgpiod.tar.gz https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-$LIBGPIOD_VERSION.tar.gz \
+	&& tar -ozxf libgpiod.tar.gz -C /libgpiod \
+	&& rm libgpiod.tar.gz \
+	&& cd /libgpiod/libgpiod-$LIBGPIOD_VERSION \
+	&& mkdir -p /usr/share/libgpiod \
+	&& mkdir -p /usr/share/libgpiod/share \
+	&& chmod +x autogen.sh
+RUN cd /libgpiod/libgpiod-$LIBGPIOD_VERSION \
+	&& ./autogen.sh --enable-tools=yes --prefix=/usr/share/libgpiod ac_cv_func_malloc_0_nonnull=yes \
+	&& make \
+	&& make install
+
+RUN cp /usr/share/libgpiod/bin/gpio* /usr/bin/ \
+	&& cp /usr/share/libgpiod/lib/libgpiod* /usr/lib/ \
+	&& zip -r9 /artifacts.zip /usr/bin/gpio* /usr/lib/libgpiod*
+
+FROM ubuntu:20.04
+MAINTAINER DevDotNet.Org <anton@devdotnet.org>
+LABEL maintainer="DevDotNet.Org <anton@devdotnet.org>"
+
+COPY --from=prep /artifacts.zip /
+
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends unzip \
+	&& unzip -o /artifacts.zip -d / \
+	&& apt-get remove -y unzip \	
+#Cleaning
+	&& apt-get clean autoclean -y \
+	&& apt-get autoremove -y \
+	&& rm -rf /var/lib/{apt,dpkg,cache,log}/ \
+	&& rm -rf /var/log/* \
+	&& rm -rf /tmp/* /var/tmp/* \
+	&& rm -rf /usr/share/doc/ \
+	&& rm -rf /usr/share/man/ \
+	&& rm -rf /var/lib/apt/lists/*
+
+CMD ["/usr/bin/gpioinfo", "-v"]

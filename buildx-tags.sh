@@ -20,6 +20,8 @@ echo "Start BUILDX"
 
 # LIBGPIOD_VERSION=1.6.3
 
+#Alpine
+#------
 #:amd64
 docker buildx build --platform linux/amd64 -f Dockerfile.alpine --build-arg LIBGPIOD_VERSION=1.6.3 -t devdotnetorg/libgpiod:1.6.3-amd64 . --push
 #:aarch64
@@ -30,5 +32,16 @@ docker buildx build --platform linux/arm -f Dockerfile.alpine --build-arg LIBGPI
 docker buildx build --platform linux/arm,linux/arm64,linux/amd64 -f Dockerfile.alpine --build-arg LIBGPIOD_VERSION=1.6.3 -t devdotnetorg/libgpiod:1.6.3 . --push
 #:latest
 docker buildx build --platform linux/arm,linux/arm64,linux/amd64 -f Dockerfile.alpine --build-arg LIBGPIOD_VERSION=1.6.3 -t devdotnetorg/libgpiod:latest . --push
+
+#Ubuntu 20.04 LTS (Focal Fossa)
+#------
+#:amd64
+docker buildx build --platform linux/amd64 -f Dockerfile.focal --build-arg LIBGPIOD_VERSION=1.6.3 -t devdotnetorg/libgpiod:1.6.3-focal-amd64 . --push
+#:aarch64
+docker buildx build --platform linux/arm64 -f Dockerfile.focal --build-arg LIBGPIOD_VERSION=1.6.3 -t devdotnetorg/libgpiod:1.6.3-focal-aarch64 . --push
+#:armhf
+docker buildx build --platform linux/arm -f Dockerfile.focal --build-arg LIBGPIOD_VERSION=1.6.3 -t devdotnetorg/libgpiod:1.6.3-focal-armhf . --push
+#:all platform
+docker buildx build --platform linux/arm,linux/arm64,linux/amd64 -f Dockerfile.focal --build-arg LIBGPIOD_VERSION=1.6.3 -t devdotnetorg/libgpiod:1.6.3-focal . --push
 
 echo "BUILDX END"
