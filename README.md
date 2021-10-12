@@ -1,4 +1,4 @@
-# Alpine image with [Libgpiod][1] library for control GPIO Developer boards such as Raspberry Pi, Banana Pi, Orange Pi, and etc. 
+# Docker images with [Libgpiod][1] library for control GPIO Developer boards such as Raspberry Pi, Banana Pi, Orange Pi, and etc. 
 
 #### Upstream Links
 
@@ -12,18 +12,21 @@
 Tags  | Dockerfile  | OS Version  |  Libgpiod Version
 ------------- | --  | --  | --
 `:1.6.3-aarch64` `:1.6.3` `:latest` | [Dockerfile](https://github.com/devdotnetorg/docker-libgpiod/blob/master/Dockerfile.alpine) | `alpine:3.13.5` | Latest ([v1.6.3](https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-1.6.3.tar.gz))
+`:1.6.3-focal-aarch64` `:1.6.3-focal` | [Dockerfile](https://github.com/devdotnetorg/docker-libgpiod/blob/master/Dockerfile.focal) | `ubuntu:20.04` | Latest ([v1.6.3](https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-1.6.3.tar.gz))
 
 ### Linux arm32 Tags ###
 
 Tags  | Dockerfile  | OS Version  |  Libgpiod Version
 ------------- | --  | --  | --
 `:1.6.3-armhf` `:1.6.3` `:latest` | [Dockerfile](https://github.com/devdotnetorg/docker-libgpiod/blob/master/Dockerfile.alpine) | `alpine:3.13.5` | Latest ([v1.6.3](https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-1.6.3.tar.gz))
+`:1.6.3-focal-armhf` `:1.6.3-focal` | [Dockerfile](https://github.com/devdotnetorg/docker-libgpiod/blob/master/Dockerfile.focal) | `ubuntu:20.04` | Latest ([v1.6.3](https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-1.6.3.tar.gz))
 
 ### Linux amd64 Tags ###
 
 Tags  | Dockerfile  | OS Version  |  Libgpiod Version
 ------------- | --  | --  | --
 `:1.6.3-amd64` `:1.6.3` `:latest` | [Dockerfile](https://github.com/devdotnetorg/docker-libgpiod/blob/master/Dockerfile.alpine) | `alpine:3.13.5` | Latest ([v1.6.3](https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-1.6.3.tar.gz))
+`:1.6.3-focal-amd64` `:1.6.3-focal` | [Dockerfile](https://github.com/devdotnetorg/docker-libgpiod/blob/master/Dockerfile.focal) | `ubuntu:20.04` | Latest ([v1.6.3](https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-1.6.3.tar.gz))
 
 ## Linux kernel GPIO interface
 
@@ -111,7 +114,7 @@ Output:
 
 	gpiochip1 [1c20800.pinctrl] (256 lines)
 
-`docker run --rm --name test-libgpiod -v /dev/gpiochip0:/dev/gpiochip0 -v /dev/gpiochip1:/dev/gpiochip1 -v /dev/gpiochip2:/dev/gpiochip2 devdotnetorg/libgpiod gpiodetect`
+`docker run --rm --name test-libgpiod --device /dev/gpiochip0 --device /dev/gpiochip1 --device /dev/gpiochip2 devdotnetorg/libgpiod gpiodetect`
 
 output:
 
@@ -133,11 +136,64 @@ Running **gpioset**. Turning on LED on Banana Pi M64 (ARM64):
 
 `docker run --rm --name alpine-test-libgpiod --device /dev/gpiochip1 devdotnetorg/libgpiod gpioset 1 36=1`
 
-## Links in Russian
+## Using Libgpiod .so files in containers with a .NET application 
 
-- [Работа с GPIO в Linux. Часть 6. Библиотека Libgpiod](https://devdotnet.org/post/rabota-s-gpio-v-linux-chast-6-biblioteka-libgpiod/)
+To control GPIO from .NET code, the `LibGpiodDriver` class is used, the `System.Device.Gpio.Drivers` namespace. The `LibGpiodDriver` class is a wrapper around the Libgpiod library.
+
+Sample C # source code:
+
+```csharp
+GpioController controller;
+var drvGpio = new LibGpiodDriver(int_gpiochip.Value);
+controller = new GpioController(PinNumberingScheme.Logical, drvGpio);
+```
+
+For the `LibGpiodDriver` class to function, the * .so library files must be added to the container.
+
+The container under the path `/ artifacts.zip` contains all the necessary libraries and test programs (gpiodetect, etc.). All you need to do is unpack this archive.
+
+An example Dockerfile with a C # application using the Libgpiod library:
+
+```
+FROM devdotnetorg/libgpiod:1.6.3 AS sourcelibgpiod
+
+FROM mcr.microsoft.com/dotnet/runtime:5.0-alpine AS base
+WORKDIR /app
+
+FROM mcr.microsoft.com/dotnet/sdk:5.0-focal AS build
+WORKDIR /src
+COPY ["src/dotnet-gpioset.csproj", "."]
+RUN dotnet restore "./dotnet-gpioset.csproj"
+COPY /src/. .
+WORKDIR "/src/."
+RUN dotnet build "dotnet-gpioset.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "dotnet-gpioset.csproj" -c Release -o /app/publish
+
+FROM base AS final
+MAINTAINER DevDotNet.Org <anton@devdotnet.org>
+LABEL maintainer="DevDotNet.Org <anton@devdotnet.org>"
+WORKDIR /app
+COPY --from=publish /app/publish .
+# Get libgpiod
+COPY --from=sourcelibgpiod /artifacts.zip /
+
+# Add Libgpiod
+RUN apk update \
+	&& apk add --no-cache --upgrade zip \
+	&& unzip -o /artifacts.zip -d / \
+	&& apk del zip \
+	&& rm /artifacts.zip
+
+ENTRYPOINT ["dotnet", "dotnet-gpioset.dll"]
+```
 
 ## Links
+
+- [Working with GPIO in Linux. Part 6. Libgpiod Library (RU)](https://devdotnet.org/post/rabota-s-gpio-v-linux-chast-6-biblioteka-libgpiod/)
+
+- [Weather station on Banana Pi M64 (Linux, C#, Docker, RabbitMQ, AvaloniaUI)(RU)](https://habr.com/ru/company/timeweb/blog/569748/)
 
 - [Linux kernel GPIO user space interface — Sergio Prado embeddedbits.org](https://embeddedbits.org/new-linux-kernel-gpio-user-space-interface/)
 
