@@ -1,4 +1,4 @@
-# Docker images with [Libgpiod][1] library for control GPIO Developer boards such as Raspberry Pi, Banana Pi, Orange Pi, and etc. 
+# Docker images with [Libgpiod][1] library for control GPIO Developer boards such as Raspberry Pi, Banana Pi, Orange Pi, and etc. And bash scripts to install the library for Armbian/Ubuntu.
 
 #### Upstream Links
 
@@ -188,6 +188,25 @@ RUN apk update \
 
 ENTRYPOINT ["dotnet", "dotnet-gpioset.dll"]
 ```
+
+## Bash scripts to install the library for Armbian/Ubuntu
+
+To install the latest current version, you need to run the installation script, which will take the latest version of the library from the source repository. In the line for calling the setup script [setup-libgpiod-arm64.sh](https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/master/setup-libgpiod-armv7-and-arm64.sh), specify the library version number as the first parameter (for example: 1.6.3), the second parameter (optional) is the script installation folder. By default, the library will be installed in the path: /usr/share/libgpiod.
+
+Installation script from the source code of libgpiod library and utilities for ARM32 / ARM64:
+
+```bash
+cd ~/
+sudo apt-get update
+sudo apt-get install -y curl
+curl -SL --output setup-libgpiod-armv7-and-arm64.sh https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/master/setup-libgpiod-armv7-and-arm64.sh
+chmod +x setup-libgpiod-armv7-and-arm64.sh
+sudo ./setup-libgpiod-armv7-and-arm64.sh 1.6.3
+```
+
+To remove the library, execute the script: [remove-libgpiod-armv7-and-arm64.sh](https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/master/remove-libgpiod-armv7-and-arm64.sh).
+
+If, as a result of the script execution, the inscription "Successfully" appears, then the library and utilities have been successfully installed.
 
 ## Links
 
