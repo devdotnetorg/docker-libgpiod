@@ -209,6 +209,7 @@ To remove the library, execute the script: [remove-libgpiod-armv7-and-arm64.sh](
 If, as a result of the script execution, the inscription "Successfully" appears, then the library and utilities have been successfully installed.
 
 ## Links
+- [Managing GPIO pins in Linux from a Docker container using the Libgpiod library (RU)](https://devdotnet.org/post/upravlyaem-gpio-v-linux-iz-docker-bibliotekoi-libgpiod/)
 
 - [Working with GPIO in Linux. Part 6. Libgpiod Library (RU)](https://devdotnet.org/post/rabota-s-gpio-v-linux-chast-6-biblioteka-libgpiod/)
 
