@@ -6,9 +6,9 @@
 # $1 - library release number: 1.6.3
 # $2 - library installation folder (default : /usr/share/libgpiod)
 #=================================================================
-# Run: sudo ./setup-libgpiod-armv7-and-arm64 1.6.3 /usr/share/libgpiod
+# Run: sudo ./setup-libgpiod-armv7-and-arm64.sh 1.6.3 /usr/share/libgpiod
 # or
-# Run: sudo ./setup-libgpiod-armv7-and-arm64 1.6.3
+# Run: sudo ./setup-libgpiod-armv7-and-arm64.sh 1.6.3
 #=================================================================
 # DevDotNet.ORG <anton@devdotnet.org> MIT License
 
