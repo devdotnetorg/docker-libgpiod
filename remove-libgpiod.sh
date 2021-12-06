@@ -26,7 +26,7 @@ echo "==============================================="
 echo ""
 echo "=====================Remove====================="
 #
-rm -rfv ~/libgpiod-*
+rm -rfv ~/libgpiod-* &>/dev/null || echo "libgpiod-* has been removed" 
 
 if [ -d $INSTALLPATH ]; then
 	rm -rfv $INSTALLPATH    
@@ -54,18 +54,18 @@ esac
 # Removing ln
 echo "============Removing symbolic links============"
 #bin
-rm /usr/bin/gpiodetect &>/dev/null || echo "gpiodetect file not found"
-rm /usr/bin/gpiofind &>/dev/null || echo "gpiofind file not found"
-rm /usr/bin/gpioget &>/dev/null || echo "gpioget file not found"
-rm /usr/bin/gpioinfo &>/dev/null || echo "gpioinfo file not found"
-rm /usr/bin/gpiomon &>/dev/null || echo "gpiomon file not found"
-rm /usr/bin/gpioset &>/dev/null || echo "gpioset file not found"
+rm /usr/bin/gpiodetect &>/dev/null || echo "gpiodetect has been removed"
+rm /usr/bin/gpiofind &>/dev/null || echo "gpiofind has been removed"
+rm /usr/bin/gpioget &>/dev/null || echo "gpioget has been removed"
+rm /usr/bin/gpioinfo &>/dev/null || echo "gpioinfo has been removed"
+rm /usr/bin/gpiomon &>/dev/null || echo "gpiomon has been removed"
+rm /usr/bin/gpioset &>/dev/null || echo "gpioset has been removed"
 #/usr/lib
-rm /usr/lib/$LIB_FOLDER/libgpiod.a &>/dev/null || echo "libgpiod.a file not found"
-rm /usr/lib/$LIB_FOLDER/libgpiod.la &>/dev/null || echo "libgpiod.la file not found"
-rm /usr/lib/$LIB_FOLDER/libgpiod.so &>/dev/null || echo "libgpiod.so file not found"
-rm /usr/lib/$LIB_FOLDER/libgpiod.so.2 &>/dev/null || echo "libgpiod.so.2 file not found"
-rm /usr/lib/$LIB_FOLDER/libgpiod.so.2.2.2 &>/dev/null || echo "libgpiod.so.2.2.2 file not found"
+rm /usr/lib/$LIB_FOLDER/libgpiod.a &>/dev/null || echo "libgpiod.a has been removed"
+rm /usr/lib/$LIB_FOLDER/libgpiod.la &>/dev/null || echo "libgpiod.la has been removed"
+rm /usr/lib/$LIB_FOLDER/libgpiod.so &>/dev/null || echo "libgpiod.so has been removed"
+rm /usr/lib/$LIB_FOLDER/libgpiod.so.2 &>/dev/null || echo "libgpiod.so.2 has been removed"
+rm /usr/lib/$LIB_FOLDER/libgpiod.so.2.2.2 &>/dev/null || echo "libgpiod.so.2.2.2 has been removed"
 #
 echo "==============================================="
 echo "Successfully"

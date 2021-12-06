@@ -71,18 +71,18 @@ esac
 # create ln
 echo "============Creating symbolic links============"
 #bin
-rm /usr/bin/gpiodetect &>/dev/null || echo "gpiodetect file not found"
-rm /usr/bin/gpiofind &>/dev/null || echo "gpiofind file not found"
-rm /usr/bin/gpioget &>/dev/null || echo "gpioget file not found"
-rm /usr/bin/gpioinfo &>/dev/null || echo "gpioinfo file not found"
-rm /usr/bin/gpiomon &>/dev/null || echo "gpiomon file not found"
-rm /usr/bin/gpioset &>/dev/null || echo "gpioset file not found"
+rm /usr/bin/gpiodetect &>/dev/null || echo " "
+rm /usr/bin/gpiofind &>/dev/null || echo " "
+rm /usr/bin/gpioget &>/dev/null || echo " "
+rm /usr/bin/gpioinfo &>/dev/null || echo " "
+rm /usr/bin/gpiomon &>/dev/null || echo " "
+rm /usr/bin/gpioset &>/dev/null || echo " "
 #/usr/lib
-rm /usr/lib/$LIB_FOLDER/libgpiod.a &>/dev/null || echo "libgpiod.a file not found"
-rm /usr/lib/$LIB_FOLDER/libgpiod.la &>/dev/null || echo "libgpiod.la file not found"
-rm /usr/lib/$LIB_FOLDER/libgpiod.so &>/dev/null || echo "libgpiod.so file not found"
-rm /usr/lib/$LIB_FOLDER/libgpiod.so.2 &>/dev/null || echo "libgpiod.so.2 file not found"
-rm /usr/lib/$LIB_FOLDER/libgpiod.so.2.2.2 &>/dev/null || echo "libgpiod.so.2.2.2 file not found"
+rm /usr/lib/$LIB_FOLDER/libgpiod.a &>/dev/null || echo " "
+rm /usr/lib/$LIB_FOLDER/libgpiod.la &>/dev/null || echo " "
+rm /usr/lib/$LIB_FOLDER/libgpiod.so &>/dev/null || echo " "
+rm /usr/lib/$LIB_FOLDER/libgpiod.so.2 &>/dev/null || echo " "
+rm /usr/lib/$LIB_FOLDER/libgpiod.so.2.2.2 &>/dev/null || echo " "
 #set all
 ln -s $INSTALLPATH/bin/gpiodetect /usr/bin/gpiodetect
 ln -s $INSTALLPATH/bin/gpiofind /usr/bin/gpiofind
