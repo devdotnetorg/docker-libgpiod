@@ -50,7 +50,7 @@ make
 make install
 #
 LIB_FOLDER=""
-case $LIB_FOLDER in
+case $ARMBIT in
 
   aarch64)
     LIB_FOLDER="aarch64-linux-gnu"

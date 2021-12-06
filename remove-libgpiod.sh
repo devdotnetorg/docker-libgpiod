@@ -33,7 +33,7 @@ if [ -d $INSTALLPATH ]; then
 fi
 #
 LIB_FOLDER=""
-case $LIB_FOLDER in
+case $ARMBIT in
 
   aarch64)
     LIB_FOLDER="aarch64-linux-gnu"
@@ -87,30 +87,6 @@ if [ -h /usr/lib/$LIB_FOLDER/libgpiod.so.2 ]; then
 fi
 if [ -h /usr/lib/$LIB_FOLDER/libgpiod.so.2.2.2 ]; then
 	rm /usr/lib/$LIB_FOLDER/libgpiod.so.2.2.2    
-fi
-#all
-if [ -h /usr/bin/gpiodetect ]; then
-	rm /usr/bin/gpiodetect    
-fi
-
-if [ -h /usr/bin/gpiofind ]; then
-	rm /usr/bin/gpiofind    
-fi
-
-if [ -h /usr/bin/gpioget ]; then
-	rm /usr/bin/gpioget    
-fi
-
-if [ -h /usr/bin/gpioinfo ]; then
-	rm /usr/bin/gpioinfo    
-fi
-
-if [ -h /usr/bin/gpiomon ]; then
-	rm /usr/bin/gpiomon    
-fi
-
-if [ -h /usr/bin/gpioset ]; then
-	rm /usr/bin/gpioset    
 fi
 #
 echo "==============================================="
