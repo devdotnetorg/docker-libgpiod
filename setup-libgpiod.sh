@@ -122,4 +122,5 @@ ln -s $INSTALLPATH/lib/libgpiod.so.2.2.2 /usr/lib/$LIB_FOLDER/libgpiod.so.2.2.2
 cp -R $INSTALLPATH/share/ /usr/lib/$LIB_FOLDER/
 #
 echo "==============================================="
+
 echo "Successfully"
