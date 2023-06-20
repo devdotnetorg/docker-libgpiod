@@ -3,18 +3,20 @@
 # C library and tools for interacting with the linux GPIO character device
 ########################
 
-FROM ubuntu:20.04 as prep
+ARG IMAGE_VERSION="ubuntu:22.04"
 
-ARG LIBGPIOD_VERSION=1.6.3
+# build
+FROM $IMAGE_VERSION
+ARG LIBGPIOD_VERSION="2.0.1"
 
 RUN apt-get update
-RUN apt-get install -y --no-install-recommends curl ca-certificates autoconf automake autoconf-archive libtool tar zip
+RUN apt-get install -y --no-install-recommends curl wget ca-certificates autoconf automake autoconf-archive libtool tar zip mc
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata \
 	&& dpkg-reconfigure --frontend noninteractive tzdata \
 	&& DEBIAN_FRONTEND=noninteractive apt-get install -y pkg-config
 
-RUN apt-get install -y --no-install-recommends gawk mawk gcc make g++ zlib1g-dev linux-headers-generic
+RUN apt-get install -y --no-install-recommends gawk mawk gcc make g++ zlib1g-dev python3 python3-dev python3-setuptools libkmod-dev libmount-devel linux-headers-generic
 
 RUN mkdir -p /libgpiod \
 	&& cd /libgpiod \
@@ -26,26 +28,23 @@ RUN mkdir -p /libgpiod \
 	&& mkdir -p /usr/share/libgpiod/share \
 	&& chmod +x autogen.sh
 RUN cd /libgpiod/libgpiod-$LIBGPIOD_VERSION \
-	&& ./autogen.sh --enable-tools=yes --prefix=/usr/share/libgpiod ac_cv_func_malloc_0_nonnull=yes \
+	&& ./autogen.sh --prefix=/usr/share/libgpiod --enable-tools=yes --enable-bindings-cxx --enable-bindings-python --enable-bindings-rust --enable-tests ac_cv_func_malloc_0_nonnull=yes \
 	&& make \
 	&& make install
-
+# pack
 RUN cp /usr/share/libgpiod/bin/gpio* /usr/bin/ \
 	&& cp /usr/share/libgpiod/lib/libgpiod* /usr/lib/ \
 	&& zip -r9 /artifacts.zip /usr/bin/gpio* /usr/lib/libgpiod*
+# result
 
-FROM ubuntu:20.04
+#ARG LIBGPIOD_VERSION="2.0.1"
+# Label docker image
 MAINTAINER DevDotNet.Org <anton@devdotnet.org>
+LABEL version="$LIBGPIOD_VERSION"
 LABEL maintainer="DevDotNet.Org <anton@devdotnet.org>"
-
-COPY --from=prep /artifacts.zip /
-
-RUN apt-get update \
-	&& apt-get install -y --no-install-recommends unzip \
-	&& unzip -o /artifacts.zip -d / \
-	&& apt-get remove -y unzip \	
+	
 #Cleaning
-	&& apt-get clean autoclean -y \
+RUN apt-get clean autoclean -y \
 	&& apt-get autoremove -y \
 	&& rm -rf /var/lib/{apt,dpkg,cache,log}/ \
 	&& rm -rf /var/log/* \

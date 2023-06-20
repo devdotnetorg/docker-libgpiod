@@ -1,24 +1,27 @@
 ########################
-# Image Alpine with libgpiod
+# Image Ubuntu with libgpiod
 # C library and tools for interacting with the linux GPIO character device
 ########################
 
-ARG IMAGE_VERSION="alpine:3.18"
+ARG IMAGE_VERSION="ubuntu:22.04"
 
 # build
 FROM $IMAGE_VERSION as prep
 ARG LIBGPIOD_VERSION="2.0.1"
 
-RUN apk update && apk upgrade
-RUN apk add curl wget autoconf automake autoconf-archive libtool pkgconfig tar zip gzip
-RUN apk add gawk mawk build-base gcc make g++ zlib-dev python3 python3-dev linux-headers
-RUN ln -sf /usr/bin/python3-config /usr/bin/python-config
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends curl wget ca-certificates autoconf automake autoconf-archive libtool tar zip
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata \
+	&& dpkg-reconfigure --frontend noninteractive tzdata \
+	&& DEBIAN_FRONTEND=noninteractive apt-get install -y pkg-config
+
+RUN apt-get install -y --no-install-recommends gawk mawk gcc make g++ zlib1g-dev python3 python3-dev linux-headers-generic
 
 RUN mkdir -p /libgpiod \
 	&& cd /libgpiod \
-	&& wget -O libgpiod.tar.gz  "https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-$LIBGPIOD_VERSION.tar.gz" \
-	&& file libgpiod.tar.gz \
-	&& tar -xvzf libgpiod.tar.gz -C /libgpiod \
+	&& curl -SL --output libgpiod.tar.gz https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-$LIBGPIOD_VERSION.tar.gz \
+	&& tar -ozxf libgpiod.tar.gz -C /libgpiod \
 	&& rm libgpiod.tar.gz \
 	&& cd /libgpiod/libgpiod-$LIBGPIOD_VERSION \
 	&& mkdir -p /usr/share/libgpiod \
@@ -42,17 +45,18 @@ LABEL maintainer="DevDotNet.Org <anton@devdotnet.org>"
 
 COPY --from=prep /artifacts.zip /
 
-RUN apk update \
-	&& apk add --no-cache --upgrade zip \
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends unzip \
 	&& unzip -o /artifacts.zip -d / \
-	&& apk del zip \
-	#Cleaning
-	&& rm -rf /var/lib/{cache,log}/ \
-	&& rm -rf /var/lib/apt/lists/*.lz4 \
+	&& apt-get remove -y unzip \	
+#Cleaning
+	&& apt-get clean autoclean -y \
+	&& apt-get autoremove -y \
+	&& rm -rf /var/lib/{apt,dpkg,cache,log}/ \
 	&& rm -rf /var/log/* \
 	&& rm -rf /tmp/* /var/tmp/* \
 	&& rm -rf /usr/share/doc/ \
 	&& rm -rf /usr/share/man/ \
-	&& rm -rf /var/cache/apk/*
+	&& rm -rf /var/lib/apt/lists/*
 
 CMD ["/usr/bin/gpioinfo", "-v"]
