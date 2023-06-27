@@ -1,50 +1,43 @@
-########################
+##########################################
 # Image Alpine with libgpiod
-# C library and tools for interacting with the linux GPIO character device
-########################
+# C library and tools for interacting with
+# the linux GPIO character device
+# Site: https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git
+##########################################
 
 ARG IMAGE_VERSION="alpine:3.18"
 
 # build
-FROM $IMAGE_VERSION as prep
-ARG LIBGPIOD_VERSION="2.0.1"
+FROM $IMAGE_VERSION as build
+ARG LIB_VERSION="2.0.1"
 
-RUN apk update && apk upgrade
-RUN apk add curl wget autoconf automake autoconf-archive libtool pkgconfig tar zip gzip
-RUN apk add gawk mawk build-base gcc make g++ zlib-dev python3 python3-dev linux-headers
-RUN ln -sf /usr/bin/python3-config /usr/bin/python-config
+# Install
+RUN apk update && apk upgrade --available && apk add --no-cache --upgrade sudo bash
 
-RUN mkdir -p /libgpiod \
-	&& cd /libgpiod \
-	&& wget -O libgpiod.tar.gz  "https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-$LIBGPIOD_VERSION.tar.gz" \
-	&& file libgpiod.tar.gz \
-	&& tar -xvzf libgpiod.tar.gz -C /libgpiod \
-	&& rm libgpiod.tar.gz \
-	&& cd /libgpiod/libgpiod-$LIBGPIOD_VERSION \
-	&& mkdir -p /usr/share/libgpiod \
-	&& mkdir -p /usr/share/libgpiod/share \
-	&& chmod +x autogen.sh
-RUN cd /libgpiod/libgpiod-$LIBGPIOD_VERSION \
-	&& ./autogen.sh --enable-tools=yes --enable-bindings-cxx --enable-bindings-python --prefix=/usr/share/libgpiod ac_cv_func_malloc_0_nonnull=yes \
-	&& make \
-	&& make install
-# pack
-RUN cp /usr/share/libgpiod/bin/gpio* /usr/bin/ \
-	&& cp /usr/share/libgpiod/lib/libgpiod* /usr/lib/ \
-	&& zip -r9 /artifacts.zip /usr/bin/gpio* /usr/lib/libgpiod*
+# Copy to image
+COPY setup-libgpiod.sh /
+RUN chmod +x /setup-libgpiod.sh \
+	&& /setup-libgpiod.sh --type source --path /usr/share/libgpiod --version ${LIB_VERSION} --artifact yes
+
+# out
+FROM scratch as artifact
+COPY --from=build /out/* /
+
 # result
-FROM $IMAGE_VERSION
-ARG LIBGPIOD_VERSION="2.0.1"
+FROM $IMAGE_VERSION as release
+ARG LIB_VERSION="2.0.1"
 # Label docker image
 MAINTAINER DevDotNet.Org <anton@devdotnet.org>
-LABEL version="$LIBGPIOD_VERSION"
+LABEL version="$LIB_VERSION"
 LABEL maintainer="DevDotNet.Org <anton@devdotnet.org>"
 
-COPY --from=prep /artifacts.zip /
+COPY --from=build /usr/share/libgpiod/artifact.zip /artifact.zip
 
 RUN apk update \
+	&& apk upgrade --available \
 	&& apk add --no-cache --upgrade zip \
 	&& unzip -o /artifacts.zip -d / \
+	&& rm /artifact.zip \
 	&& apk del zip \
 	#Cleaning
 	&& rm -rf /var/lib/{cache,log}/ \
