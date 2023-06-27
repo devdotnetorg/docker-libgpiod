@@ -4,7 +4,7 @@
 # Site: https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git
 # Script version: 3.0
 # arguments:
-# -p = library installation folder (default : /usr/share/libgpiod).
+# -p|--path: library installation folder (default: /usr/share/libgpiod).
 #=================================================================
 # Run:	chmod +x remove-libgpiod.sh
 # 		sudo ./remove-libgpiod.sh -p /usr/share/libgpiod
@@ -32,19 +32,22 @@ if [ $ID_OS != "ubuntu" ] && [ $ID_OS != "debian" ] && [ $ID_OS != "alpine" ]; t
 fi
 
 # reading arguments from CLI
-while getopts "p:" opt; do
-  case $opt in
-    p) INSTALL_PATH="$OPTARG"
-    ;;
-    \?) echo "Invalid option -$OPTARG" >&2
-    exit 1;
-    ;;
-  esac
-
-  case $OPTARG in
-    -*) echo "Option $opt needs a valid argument"
-    exit 1;
-    ;;
+wPOSITIONAL_ARGS=()
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -p|--path)
+      INSTALL_PATH="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    -*|--*)
+      echo "Unknown option $1"
+      exit 1
+      ;;
+    *)
+      POSITIONAL_ARGS+=("$1") # save positional arg
+      shift # past argument
+      ;;
   esac
 done
 
