@@ -26,13 +26,14 @@
 set -e
 
 # definition of variables
-declare ARCH_OS=$(uname -m) #aarch64, armv7l, or x86_64
+declare ARCH_OS=$(uname -m) #aarch64, armv7l, x86_64 or riscv64
 declare ID_OS=("$(cat /etc/*release | grep '^ID=' | sed 's/.*=\s*//')") # ubuntu, debian, alpine
 declare VERSION_OS=("$(cat /etc/*release | grep '^VERSION_ID=' | sed 's/.*=\s*//')")
 VERSION_OS=("$(echo ${VERSION_OS} | sed 's/\"//g')")
 
 # requirements check
-if [ $ARCH_OS != "aarch64" ] && [ $ARCH_OS != "armv7l" ] && [ $ARCH_OS != "x86_64" ]; then
+if [ $ARCH_OS != "aarch64" ] && [ $ARCH_OS != "armv7l" ] \
+ && [ $ARCH_OS != "x86_64" ]&& [ $ARCH_OS != "riscv64" ]; then
 	echo "ERROR. Current OS architecture ${ARCH_OS} is not supported."
 	exit 1;
 fi
@@ -253,6 +254,25 @@ fi
 if [ "${BUILD_ARG}" == "" ]; then
 	BUILD_ARG="--enable-tools=yes --enable-bindings-cxx \
 --enable-bindings-python ac_cv_func_malloc_0_nonnull=yes"
+	# lib 2.0.1 2.0 in ubuntu 20.04, 18.04 - not support python
+	if [ "${LIB_VERSION}" == "2.0.1" ] || [ "${LIB_VERSION}" == "2.0" ]; then
+		if [ $ID_OS == "ubuntu" ]; then
+			if [ "${VERSION_OS}" == "20.04" ]; then
+				#
+				BUILD_ARG="--enable-tools=yes --enable-bindings-cxx ac_cv_func_malloc_0_nonnull=yes"
+				END_NAME_ARTIFACT="-without_support_python"
+				echo "WARNING! $ID_OS ${VERSION_OS} builds libgpiod without PYTHON support."
+				#
+			fi
+			if [ "${VERSION_OS}" == "18.04" ]; then
+				#
+				BUILD_ARG="--enable-tools=yes ac_cv_func_malloc_0_nonnull=yes"
+				END_NAME_ARTIFACT="-without_support_python_and_cxx"
+				echo "WARNING! $ID_OS ${VERSION_OS} builds libgpiod without PYTHON and C++ support."
+				#
+			fi
+		fi
+	fi
 fi
 
 if [ -z $ARTIFACT ]; then
@@ -365,7 +385,7 @@ if [ $TYPE_SETUP == "source" ]; then
 		fi
 		cd $INSTALL_PATH
 		zip -r9 artifact.zip bin include lib share
-		FILENAME_ZIP=libgpiod-bin-${LIB_VERSION}-${ID_OS}-${VERSION_OS}-${ARCH_OS}.zip
+		FILENAME_ZIP=libgpiod-bin-${LIB_VERSION}-${ID_OS}-${VERSION_OS}-${ARCH_OS}${END_NAME_ARTIFACT}.zip
 		echo "FILENAME_ZIP=${FILENAME_ZIP}"
 		mkdir /out
 		cp artifact.zip /out/${FILENAME_ZIP}
