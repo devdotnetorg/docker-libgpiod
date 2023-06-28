@@ -12,7 +12,7 @@ FROM $IMAGE_VERSION as build
 ARG LIB_VERSION="2.0.1"
 
 # Install
-RUN apt-get update && apt-get upgrade && apt-get install -y --no-install-recommends sudo
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends sudo
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata \
 	&& dpkg-reconfigure --frontend noninteractive tzdata \
@@ -38,7 +38,7 @@ LABEL maintainer="DevDotNet.Org <anton@devdotnet.org>"
 COPY --from=build /usr/share/libgpiod/artifact.zip /artifact.zip
 
 RUN apt-get update \
-	&& apt-get upgrade \
+	&& apt-get upgrade -y \
 	&& apt-get install -y --no-install-recommends unzip \
 	&& unzip -o /artifact.zip -d /usr/ \
 	&& rm /artifact.zip \

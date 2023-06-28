@@ -287,8 +287,14 @@ if [ $TYPE_SETUP == "source" ]; then
 	fi
 	if [ $ID_OS != "alpine" ]; then
 		# ubuntu, debian
-		sudo apt-get install -y --no-install-recommends curl wget ca-certificates autoconf automake autoconf-archive libtool pkg-config tar zip gzip
-		sudo apt-get install -y --no-install-recommends gawk mawk gcc make g++ python3 python3-dev python3-setuptools libclang-dev doxygen help2man linux-headers-generic
+		sudo apt-get install -y curl wget ca-certificates autoconf automake autoconf-archive libtool pkg-config tar zip gzip
+		sudo apt-get install -y gawk mawk gcc make g++ libclang-dev doxygen help2man linux-headers-generic
+		# python3
+		sudo apt-get install -y --install-recommends python3 python3-dev python3-distutils python3-setuptools python3-venv
+		# fix python3 path
+		alias python='python3'
+		sudo ln -sf /usr/bin/python3 /usr/bin/python
+		sudo ln -sf /usr/bin/python3-config /usr/bin/python-config
 		# for Rust: cargo
 		sudo mkdir -p $INSTALL_PATH/source
 		cd $INSTALL_PATH/source
@@ -318,6 +324,7 @@ if [ $TYPE_SETUP == "source" ]; then
 		apk add --no-cache --upgrade gawk mawk build-base gcc make g++ zlib-dev python3 python3-dev \
 		  py3-setuptools doxygen help2man linux-headers
 		# ubuntu: libclang-dev
+		# fix python3 path
 		ln -sf /usr/bin/python3-config /usr/bin/python-config
 		#
 		mkdir -p $INSTALL_PATH/source
