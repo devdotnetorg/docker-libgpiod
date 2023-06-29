@@ -16,7 +16,7 @@ echo "Start BUILDX"
 #:alpine 3.18, 3.17, 3.16, 3.15
 
 # full: 2.0.1 2.0 1.6.4 1.6.3
-for LIB_VERSION in 2.0.1 2.0 1.6.4 1.6.3
+for LIB_VERSION in 2.0 1.6.4 1.6.3
 do
   # ubuntu, debian
   for IMAGE_VERSION in ubuntu:23.04 ubuntu:22.10 ubuntu:22.04 ubuntu:20.04 ubuntu:18.04 debian:12 debian:11

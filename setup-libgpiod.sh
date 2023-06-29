@@ -30,6 +30,8 @@ declare ARCH_OS=$(uname -m) #aarch64, armv7l, x86_64 or riscv64
 declare ID_OS=("$(cat /etc/*release | grep '^ID=' | sed 's/.*=\s*//')") # ubuntu, debian, alpine
 declare VERSION_OS=("$(cat /etc/*release | grep '^VERSION_ID=' | sed 's/.*=\s*//')")
 VERSION_OS=("$(echo ${VERSION_OS} | sed 's/\"//g')")
+# get only type XX.YY
+VERSION_OS=("$(cut -d '.' -f 1 <<< "$VERSION_OS")"."$(cut -d '.' -f 2 <<< "$VERSION_OS")")
 
 # requirements check
 if [ $ARCH_OS != "aarch64" ] && [ $ARCH_OS != "armv7l" ] \
