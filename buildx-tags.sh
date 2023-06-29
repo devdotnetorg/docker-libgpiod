@@ -6,10 +6,10 @@
 # $ mkdir -p ~/.docker/cli-plugins
 # $ mv buildx ~/.docker/cli-plugins/docker-buildx
 
-# Execute each time before building with buildx
-# $ export DOCKER_BUILDKIT=1
-# $ docker run --rm --privileged docker/binfmt:a7996909642ee92942dcd6cff44b9b95f08dad64
-# $ cat /proc/sys/fs/binfmt_misc/qemu-aarch64
+#!/bin/bash
+
+# Install buildx
+# Post https://devdotnet.org/post/sborka-docker-konteinerov-dlya-arm-arhitekturi-ispolzuya-buildx/
 
 # $ chmod +x buildx-tags.sh
 # $ ./buildx-tags.sh
@@ -18,41 +18,92 @@ set -e
 
 echo "Start BUILDX"
 
-# LIBGPIOD_VERSION=1.6.3
+for LIB_VERSION in 2.0.1 2.0 1.6.4 1.6.3
+do
+	echo "BUILD version: ${LIB_VERSION} Ubuntu 22.04"
+	#Ubuntu 22.04 LTS (Jammy Jellyfish)
+	#------
+    docker buildx build --platform linux/arm,linux/arm64,linux/amd64 -f Dockerfile.ubuntu \
+    --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=ubuntu:22.04 \
+    -t devdotnetorg/libgpiod:${LIB_VERSION}-ubuntu-22.04 . --push
+	#
+    docker buildx build --platform linux/arm,linux/arm64,linux/amd64 -f Dockerfile.ubuntu \
+    --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=ubuntu:22.04 \
+    -t devdotnetorg/libgpiod:${LIB_VERSION}-ubuntu . --push
+    echo "BUILD version: ${LIB_VERSION} Debian 12"
+	#Debian 12 (Bookworm)
+	#------
+	docker buildx build --platform linux/arm,linux/arm64,linux/amd64 -f Dockerfile.ubuntu \
+    --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=debian:12 \
+    -t devdotnetorg/libgpiod:${LIB_VERSION}-debian-12 . --push
+	#
+	docker buildx build --platform linux/arm,linux/arm64,linux/amd64 -f Dockerfile.ubuntu \
+    --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=debian:12 \
+    -t devdotnetorg/libgpiod:${LIB_VERSION}-debian . --push
+	echo "BUILD version: ${LIB_VERSION} Alpine 3.18"
+	#Alpine 3.18
+	#------
+	docker buildx build --platform linux/arm,linux/arm64,linux/amd64 -f Dockerfile.alpine \
+    --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=alpine:3.18 \
+    -t devdotnetorg/libgpiod:${LIB_VERSION}-alpine-3.18 . --push
+	#
+	docker buildx build --platform linux/arm,linux/arm64,linux/amd64 -f Dockerfile.alpine \
+    --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=alpine:3.18 \
+    -t devdotnetorg/libgpiod:${LIB_VERSION}-alpine . --push
+	#:latest-version
+	docker buildx build --platform linux/arm,linux/arm64,linux/amd64 -f Dockerfile.alpine \
+    --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=alpine:3.18 \
+    -t devdotnetorg/libgpiod:${LIB_VERSION} . --push
+done
 
-#Alpine
-#------
-#:amd64
-docker buildx build --platform linux/amd64 -f Dockerfile.alpine --build-arg LIBGPIOD_VERSION=1.6.3 -t devdotnetorg/libgpiod:1.6.3-amd64 . --push
-#:aarch64
-docker buildx build --platform linux/arm64 -f Dockerfile.alpine --build-arg LIBGPIOD_VERSION=1.6.3 -t devdotnetorg/libgpiod:1.6.3-aarch64 . --push
-#:armhf
-docker buildx build --platform linux/arm -f Dockerfile.alpine --build-arg LIBGPIOD_VERSION=1.6.3 -t devdotnetorg/libgpiod:1.6.3-armhf . --push
-#:all platform
-docker buildx build --platform linux/arm,linux/arm64,linux/amd64 -f Dockerfile.alpine --build-arg LIBGPIOD_VERSION=1.6.3 -t devdotnetorg/libgpiod:1.6.3 . --push
 #:latest
-docker buildx build --platform linux/arm,linux/arm64,linux/amd64 -f Dockerfile.alpine --build-arg LIBGPIOD_VERSION=1.6.3 -t devdotnetorg/libgpiod:latest . --push
+LIB_VERSION=2.0.1
+#
+"BUILD version: ${LIB_VERSION} :latest"
+docker buildx build --platform linux/arm,linux/arm64,linux/amd64 -f Dockerfile.alpine \
+    --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=alpine:3.18 \
+    -t devdotnetorg/libgpiod . --push
 
-#Ubuntu 20.04 LTS (Focal Fossa)
-#------
-#:amd64
-docker buildx build --platform linux/amd64 -f Dockerfile.focal --build-arg LIBGPIOD_VERSION=1.6.3 -t devdotnetorg/libgpiod:1.6.3-focal-amd64 . --push
-#:aarch64
-docker buildx build --platform linux/arm64 -f Dockerfile.focal --build-arg LIBGPIOD_VERSION=1.6.3 -t devdotnetorg/libgpiod:1.6.3-focal-aarch64 . --push
-#:armhf
-docker buildx build --platform linux/arm -f Dockerfile.focal --build-arg LIBGPIOD_VERSION=1.6.3 -t devdotnetorg/libgpiod:1.6.3-focal-armhf . --push
-#:all platform
-docker buildx build --platform linux/arm,linux/arm64,linux/amd64 -f Dockerfile.focal --build-arg LIBGPIOD_VERSION=1.6.3 -t devdotnetorg/libgpiod:1.6.3-focal . --push
+# RISC-V (riscv64)
 
-#Debian 10 buster 
-#------
-#:amd64
-#docker buildx build --platform linux/amd64 -f Dockerfile.buster --build-arg LIBGPIOD_VERSION=1.6.3 -t devdotnetorg/libgpiod:1.6.3-buster-amd64 . --push
-#:aarch64
-#docker buildx build --platform linux/arm64 -f Dockerfile.buster --build-arg LIBGPIOD_VERSION=1.6.3 -t devdotnetorg/libgpiod:1.6.3-buster-aarch64 . --push
-#:armhf
-#docker buildx build --platform linux/arm -f Dockerfile.buster --build-arg LIBGPIOD_VERSION=1.6.3 -t devdotnetorg/libgpiod:1.6.3-buster-armhf . --push
-#:all platform
-#docker buildx build --platform linux/arm,linux/arm64,linux/amd64 -f Dockerfile.buster --build-arg LIBGPIOD_VERSION=1.6.3 -t devdotnetorg/libgpiod:1.6.3-buster . --push
+for LIB_VERSION in 2.0.1 2.0 1.6.4 1.6.3
+do
+	echo "BUILD version: ${LIB_VERSION} riscv64/ubuntu:22.04"
+	#Ubuntu 22.04 LTS (Jammy Jellyfish)
+	#------
+    docker buildx build --platform linux/riscv64 -f Dockerfile.ubuntu \
+    --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=riscv64/ubuntu:22.04 \
+    -t devdotnetorg/libgpiod:${LIB_VERSION}-ubuntu-22.04-riscv64 . --push
+    docker buildx build --platform linux/riscv64 -f Dockerfile.ubuntu \
+    --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=riscv64/ubuntu:22.04 \
+    -t devdotnetorg/libgpiod:${LIB_VERSION}-ubuntu-riscv64 . --push
+	echo "BUILD version: ${LIB_VERSION} riscv64/debian:sid"
+	#Debian SID
+	#------
+	docker buildx build --platform linux/riscv64 -f Dockerfile.ubuntu \
+    --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=riscv64/debian:sid \
+    -t devdotnetorg/libgpiod:${LIB_VERSION}-debian-sid-riscv64 . --push
+	#
+	docker buildx build --platform linux/riscv64 -f Dockerfile.ubuntu \
+    --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=riscv64/debian:sid \
+    -t devdotnetorg/libgpiod:${LIB_VERSION}-debian-riscv64 . --push
+	echo "BUILD version: ${LIB_VERSION} riscv64/alpine:edge"
+	#Alpine 3.18
+	#------
+	docker buildx build --platform linux/riscv64 -f Dockerfile.alpine \
+    --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=riscv64/alpine:edge \
+    -t devdotnetorg/libgpiod:${LIB_VERSION}-alpine-edge-riscv64 . --push
+	#
+	docker buildx build --platform linux/riscv64 -f Dockerfile.alpine \
+    --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=riscv64/alpine:edge \
+    -t devdotnetorg/libgpiod:${LIB_VERSION}-alpine-riscv64 . --push
+done
+
+#:latest-riscv64
+LIB_VERSION=2.0.1
+#
+docker buildx build --platform linux/riscv64 -f Dockerfile.alpine \
+    --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=riscv64/alpine:edge \
+    -t devdotnetorg/libgpiod:${LIB_VERSION}-riscv64 . --push
 
 echo "BUILDX END"

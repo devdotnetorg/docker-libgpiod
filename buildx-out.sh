@@ -15,6 +15,7 @@ echo "Start BUILDX"
 #:debian 12, 11
 #:alpine 3.18, 3.17, 3.16, 3.15
 
+# full: 2.0.1 2.0 1.6.4 1.6.3
 for LIB_VERSION in 2.0.1 2.0 1.6.4 1.6.3
 do
   # ubuntu, debian

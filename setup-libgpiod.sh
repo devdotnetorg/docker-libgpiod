@@ -308,6 +308,7 @@ if [ $TYPE_SETUP == "source" ]; then
 	if [ $ID_OS != "alpine" ]; then
 		# ubuntu, debian
 		sudo apt-get install -y curl wget ca-certificates autoconf automake autoconf-archive libtool pkg-config tar zip gzip
+		sudo update-ca-certificates
 		sudo apt-get install -y gawk mawk gcc make g++ libclang-dev doxygen help2man linux-headers-generic
 		# python3
 		sudo apt-get install -y --install-recommends python3 python3-dev python3-distutils python3-setuptools python3-venv
@@ -318,7 +319,7 @@ if [ $TYPE_SETUP == "source" ]; then
 		# for Rust: cargo
 		sudo mkdir -p $INSTALL_PATH/source
 		cd $INSTALL_PATH/source
-		sudo wget -O libgpiod.tar.gz  "https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-${LIB_VERSION}.tar.gz"
+		sudo wget --no-check-certificate -O libgpiod.tar.gz  "https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-${LIB_VERSION}.tar.gz"
 		file libgpiod.tar.gz
 		sudo mkdir -p $INSTALL_PATH/share
 		sudo tar -xvzf libgpiod.tar.gz -C $INSTALL_PATH/source
@@ -340,6 +341,8 @@ if [ $TYPE_SETUP == "source" ]; then
 	else
 		# alpine
 		apk update
+		apk add --no-cache --upgrade ca-certificates
+		update-ca-certificates
 		apk add --no-cache --upgrade curl wget autoconf automake autoconf-archive libtool pkgconfig tar zip gzip
 		apk add --no-cache --upgrade gawk mawk build-base gcc make g++ zlib-dev python3 python3-dev \
 		  py3-setuptools doxygen help2man linux-headers
