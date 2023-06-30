@@ -4,7 +4,7 @@
 # Site: https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git
 # Script version: 3.0
 # arguments:
-# 1) -t|--type: installation type  (default: binary);
+# 1) -t|--type: installation type  (default: source);
 #		binary - installation from binaries, no questions asked installation (hidden installation),
 #        all default settings;
 #		find_ver - find out the version in the repository;
@@ -187,7 +187,7 @@ if [ -z $TYPE_SETUP ]; then
 				;;
 			"Installation from binaries")
 				TYPE_SETUP="binary"
-				NUMBER_STEPS=2
+				NUMBER_STEPS=3
 				break;
 				;;
 			"Quit")
@@ -240,9 +240,48 @@ if [ -z $TYPE_SETUP ]; then
 	fi
 fi
 
+# binary
+if [ $TYPE_SETUP == "binary" ]; then
+	#curl
+	curl --version &>/dev/null || (echo "Updating package information" && sudo apt-get update \
+ && sudo apt-get install -y curl)
+	echo "Package search ..."
+	# get list
+	# select - ARCH_OS, ID_OS, VERSION_OS, LIB_VERSION
+	declare LIST_BIN=$(cat out/list.txt | grep ${ARCH_OS} | grep ${ID_OS} | \
+ grep ${VERSION_OS} | grep "${LIB_VERSION}")
+	LIST_BIN=$(echo "$LIST_BIN" | tr '\n' ' ')
+	IFS=' ' read -r -a options <<< "$LIST_BIN"
+	echo "==============================================="
+	echo "Your OS ${ID_OS} ${VERSION_OS} architecture ${ARCH_OS}"
+	echo "==============================================="
+	# no option
+	# select - ARCH_OS, ID_OS
+	if [ ${#options[@]} == 0 ]; then
+		LIST_BIN=$(cat out/list.txt | grep ${ARCH_OS} | grep ${ID_OS})
+		LIST_BIN=$(echo "$LIST_BIN" | tr '\n' ' ')
+		IFS=' ' read -r -a options <<< "$LIST_BIN"
+	fi
+	# select - ARCH_OS
+	if [ ${#options[@]} == 0 ]; then
+		LIST_BIN=$(cat out/list.txt | grep ${ARCH_OS})
+		LIST_BIN=$(echo "$LIST_BIN" | tr '\n' ' ')
+		IFS=' ' read -r -a options <<< "$LIST_BIN"
+	fi
+	# SELECT
+	PS3="3/${NUMBER_STEPS}. Select version of Libgpiod library. Please enter your choice: "
+	echo "Library versions:"
+	select opt in "${options[@]}"
+		do
+			FILENAME_BIN=$opt
+			echo "You choosed: ${FILENAME_BIN}"
+			break;
+		done
+fi
+
 # defining default values
 if [ -z $TYPE_SETUP ]; then
-	TYPE_SETUP="binary"
+	TYPE_SETUP="source"
 fi
 
 if [ -z $INSTALL_PATH ]; then
@@ -399,10 +438,18 @@ if [ $TYPE_SETUP == "source" ]; then
 fi
 
 # Installation from binaries
-# TODO
-
-
-
+if [ $TYPE_SETUP == "binary" ]; then
+	# defining  value
+	if [ -z $FILENAME_BIN ]; then
+		echo "ERROR. No binary package found for your OS"
+		exit 1;
+	fi
+	# install
+	# download script
+	# wget
+	chmod +x setup-libgpiod-from-bin.sh
+	./setup-libgpiod-from-bin.sh --filename ${FILENAME_BIN}
+fi
 
 #
 funcCheckVer
