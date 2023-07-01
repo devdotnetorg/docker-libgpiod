@@ -35,11 +35,11 @@ COPY --from=build /usr/share/libgpiod/artifact.zip /artifact.zip
 
 RUN apk update \
 	&& apk upgrade --available \
-	&& apk add --no-cache --upgrade zip \
-	&& unzip -o /artifacts.zip -d / \
+	&& apk add --no-cache --upgrade unzip \
+	&& unzip -o /artifact.zip -d /usr/ \
 	&& rm /artifact.zip \
-	&& apk del zip \
-	#Cleaning
+	&& apk del unzip \
+#Cleaning
 	&& rm -rf /var/lib/{cache,log}/ \
 	&& rm -rf /var/lib/apt/lists/*.lz4 \
 	&& rm -rf /var/log/* \

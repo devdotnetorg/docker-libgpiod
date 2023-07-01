@@ -242,13 +242,14 @@ fi
 
 # binary
 if [ $TYPE_SETUP == "binary" ]; then
-	#curl
-	curl --version &>/dev/null || (echo "Updating package information" && sudo apt-get update \
- && sudo apt-get install -y curl)
+	#wget
+	wget --version &>/dev/null || (echo "Updating package information" && sudo apt-get update \
+ && sudo apt-get install -y wget)
 	echo "Package search ..."
 	# get list
+	wget -O list.txt "https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/dev/out/list.txt"
 	# select - ARCH_OS, ID_OS, VERSION_OS, LIB_VERSION
-	declare LIST_BIN=$(cat out/list.txt | grep ${ARCH_OS} | grep ${ID_OS} | \
+	declare LIST_BIN=$(cat list.txt | grep ${ARCH_OS} | grep ${ID_OS} | \
  grep ${VERSION_OS} | grep "${LIB_VERSION}")
 	LIST_BIN=$(echo "$LIST_BIN" | tr '\n' ' ')
 	IFS=' ' read -r -a options <<< "$LIST_BIN"
@@ -258,13 +259,13 @@ if [ $TYPE_SETUP == "binary" ]; then
 	# no option
 	# select - ARCH_OS, ID_OS
 	if [ ${#options[@]} == 0 ]; then
-		LIST_BIN=$(cat out/list.txt | grep ${ARCH_OS} | grep ${ID_OS})
+		LIST_BIN=$(cat list.txt | grep ${ARCH_OS} | grep ${ID_OS})
 		LIST_BIN=$(echo "$LIST_BIN" | tr '\n' ' ')
 		IFS=' ' read -r -a options <<< "$LIST_BIN"
 	fi
 	# select - ARCH_OS
 	if [ ${#options[@]} == 0 ]; then
-		LIST_BIN=$(cat out/list.txt | grep ${ARCH_OS})
+		LIST_BIN=$(cat list.txt | grep ${ARCH_OS})
 		LIST_BIN=$(echo "$LIST_BIN" | tr '\n' ' ')
 		IFS=' ' read -r -a options <<< "$LIST_BIN"
 	fi
@@ -444,11 +445,16 @@ if [ $TYPE_SETUP == "binary" ]; then
 		echo "ERROR. No binary package found for your OS"
 		exit 1;
 	fi
+	# unzip
+	unzip --help &>/dev/null || (echo "Updating package information" && sudo apt-get update \
+ && sudo apt-get install -y unzip)
+	echo "Package download ..."
+	# download bin
+	wget -O libgpiod-bin.zip "https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/dev/out/${FILENAME_BIN}.zip"
 	# install
-	# download script
-	# wget
-	chmod +x setup-libgpiod-from-bin.sh
-	./setup-libgpiod-from-bin.sh --filename ${FILENAME_BIN}
+	sudo unzip -o libgpiod-bin.zip -d /usr/
+	rm libgpiod-bin.zip
+	#
 fi
 
 #
