@@ -10,7 +10,7 @@ set -e
 
 echo "Start BUILDX"
 
-for LIB_VERSION in 2.0.1 2.0 1.6.4
+for LIB_VERSION in 2.0.2 2.0.1 2.0 1.6.4
 do
 	echo "BUILD version: ${LIB_VERSION} Ubuntu 22.04"
 	#Ubuntu 22.04 LTS (Jammy Jellyfish)
@@ -39,7 +39,7 @@ do
 done
 
 #:latest
-LIB_VERSION=2.0.1
+LIB_VERSION=2.0.2
 #
 
 echo "BUILD version: ${LIB_VERSION} :latest"
@@ -48,7 +48,7 @@ docker buildx build --platform linux/arm,linux/arm64,linux/amd64 -f Dockerfile.a
     -t devdotnetorg/libgpiod . --push
 
 # RISC-V (riscv64)
-for LIB_VERSION in 2.0.1 2.0 1.6.4
+for LIB_VERSION in 2.0.2 2.0.1 2.0 1.6.4
 do
 	echo "BUILD version: ${LIB_VERSION} riscv64/ubuntu:22.04"
 	#Ubuntu 22.04 LTS (Jammy Jellyfish)
@@ -72,7 +72,7 @@ do
 done
 
 #:latest-riscv64
-LIB_VERSION=2.0.1
+LIB_VERSION=2.0.2
 #
 docker buildx build --platform linux/riscv64 -f Dockerfile.alpine \
     --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=riscv64/alpine:edge \

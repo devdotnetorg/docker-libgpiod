@@ -200,10 +200,14 @@ if [ -z $TYPE_SETUP ]; then
 	
 	# LIB_VERSION
 	PS3="2/${NUMBER_STEPS}. Select version of Libgpiod library. Please enter your choice (recommended: 1): "
-	options=('2.0.1' '2.0' '1.6.4' '1.6.3' 'Quit')
+	options=('2.0.2' '2.0.1' '2.0' '1.6.4' '1.6.3' 'Quit')
 	select opt in "${options[@]}"
 	do
 		case $opt in
+			'2.0.2')
+				LIB_VERSION="2.0.2"
+				break;
+				;;		
 			'2.0.1')
 				LIB_VERSION="2.0.1"
 				break;
@@ -290,14 +294,14 @@ if [ -z $INSTALL_PATH ]; then
 fi
 
 if [ -z $LIB_VERSION ]; then
-	LIB_VERSION="2.0.1"
+	LIB_VERSION="2.0.2"
 fi
 
 if [ "${BUILD_ARG}" == "" ]; then
 	BUILD_ARG="--enable-tools=yes --enable-bindings-cxx \
 --enable-bindings-python ac_cv_func_malloc_0_nonnull=yes"
-	# lib 2.0.1 2.0 in ubuntu 20.04, 18.04 - not support python
-	if [ "${LIB_VERSION}" == "2.0.1" ] || [ "${LIB_VERSION}" == "2.0" ]; then
+	# lib 2.0.2 2.0.1 2.0 in ubuntu 20.04, 18.04 - not support python
+	if [ "${LIB_VERSION}" == "2.0.2" ] || [ "${LIB_VERSION}" == "2.0.1" ] || [ "${LIB_VERSION}" == "2.0" ]; then
 		if [ $ID_OS == "ubuntu" ]; then
 			if [ "${VERSION_OS}" == "20.04" ]; then
 				#
