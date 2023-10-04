@@ -11,12 +11,12 @@
 #		repo - installation from the repository;
 #		source - installation from source.
 # 2) -p|--path: library installation folder (default: /usr/share/libgpiod).
-# 3) -v|--version: library release number (default: 2.0.1).
+# 3) -v|--version: library release number (default: 2.0.2).
 # 4) -o|--options: argument string to build the library, only if "--type source" (default: --enable-tools=yes --enable-bindings-cxx --enable-bindings-python ac_cv_func_malloc_0_nonnull=yes).
 # 5) -a|--artifact: save artifact after build from source, values: yes, no (default: no).
 #=================================================================
 # Run:	chmod +x setup-libgpiod.sh
-# 		sudo ./setup-libgpiod.sh --type source --path /usr/share/libgpiod --version 2.0.1 --options "--enable-tools=yes --enable-bindings-cxx --enable-bindings-python ac_cv_func_malloc_0_nonnull=yes"
+# 		sudo ./setup-libgpiod.sh --type source --path /usr/share/libgpiod --version 2.0.2 --options "--enable-tools=yes --enable-bindings-cxx --enable-bindings-python ac_cv_func_malloc_0_nonnull=yes"
 # or
 # Run:	chmod +x setup-libgpiod.sh
 # 		sudo ./setup-libgpiod.sh
@@ -157,7 +157,7 @@ gpiodetect --version
 if [ -z $TYPE_SETUP ]; then
 	echo "==============================================="
 	echo "Libgpiod library installation"
-	echo -e "The latest version of the Libgpiod library is \033[1;32m 2.0.1 \033[0m"
+	echo -e "The latest version of the Libgpiod library is \033[1;32m 2.0.2 \033[0m"
 	echo "==============================================="
 	NUMBER_STEPS=4
 	# TYPE_SETUP
