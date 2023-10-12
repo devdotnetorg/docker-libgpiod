@@ -2,18 +2,20 @@
 # Setup libgpiod for ARM64, ARM32, x86_64, RISC-V
 # C library and tools for interacting with the linux GPIO character device
 # Site: https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git
-# Script version: 3.0
+# Script version: 4.0
 # arguments:
-# 1) -t|--type: installation type  (default: source);
-#		binary - installation from binaries, no questions asked installation (hidden installation),
-#        all default settings;
-#		find_ver - find out the version in the repository;
-#		repo - installation from the repository;
-#		source - installation from source.
-# 2) -p|--path: library installation folder (default: /usr/share/libgpiod).
-# 3) -v|--version: library release number (default: 2.0.2).
-# 4) -o|--options: argument string to build the library, only if "--type source" (default: --enable-tools=yes --enable-bindings-cxx --enable-bindings-python ac_cv_func_malloc_0_nonnull=yes).
-# 5) -a|--artifact: save artifact after build from source, values: yes, no (default: no).
+# 1) -t|--type: installation type;
+#		binary - installation from binaries;
+#		source - installation from source;
+#		findver - find out the version in the repository;
+#		repo - installation from the repository.
+# 2) -v|--version: library release number. Only for types 'binary' and 'source'. Options available: '2.0.2' '2.0.1' '2.0' '1.6.4' '1.6.3'.
+# 3) -f|--file: name of the binary file to install. Only for type 'binary'. Source: https://github.com/devdotnetorg/docker-libgpiod/blob/dev/out/list.txt
+# 4) -c|--canselect: selection of build, values: yes, no (default: yes). Only for type 'binary'. 
+# 5) -o|--options: argument string to build the library. Only for type 'source' (default: --enable-tools=yes --enable-bindings-cxx --enable-bindings-python ac_cv_func_malloc_0_nonnull=yes).
+# 6) -p|--path: library installation folder (default: /usr/share/libgpiod). Only for type 'source'.
+# The project is compiled in this folder, then the binary files are transferred to the Linux system folders.
+# 7) -a|--artifact: save artifact after build from source, values: yes, no (default: no). Only for type 'source'.
 #=================================================================
 # Run:	chmod +x setup-libgpiod.sh
 # 		sudo ./setup-libgpiod.sh --type source --path /usr/share/libgpiod --version 2.0.2 --options "--enable-tools=yes --enable-bindings-cxx --enable-bindings-python ac_cv_func_malloc_0_nonnull=yes"
@@ -25,7 +27,7 @@
 
 set -e
 
-# definition of variables
+# **************** definition of variables ****************
 declare ARCH_OS=$(uname -m) #aarch64, armv7l, x86_64 or riscv64
 declare ID_OS=("$(cat /etc/*release | grep '^ID=' | sed 's/.*=\s*//')") # ubuntu, debian, alpine
 declare VERSION_OS=("$(cat /etc/*release | grep '^VERSION_ID=' | sed 's/.*=\s*//')")
@@ -69,13 +71,18 @@ case $ARCH_OS in
     LIB_FOLDER=""
     ;;
 esac
-
-# reading arguments from CLI
+# *********************************************************
+# *************** reading arguments from CLI **************
 POSITIONAL_ARGS=()
 while [[ $# -gt 0 ]]; do
   case $1 in
     -t|--type)
       TYPE_SETUP="$2"
+      shift # past argument
+      shift # past value
+      ;;
+	-f|--file)
+      FILENAME_BIN="$2"
       shift # past argument
       shift # past value
       ;;
@@ -94,6 +101,11 @@ while [[ $# -gt 0 ]]; do
       shift # past argument
       shift # past value
       ;; 
+    -c|--canselect)
+      CAN_SELECT="$2"
+      shift # past argument
+      shift # past value
+      ;;
     -a|--artifact)
       ARTIFACT="$2"
       shift # past argument
@@ -109,8 +121,8 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
-
-# func
+# *********************************************************
+# ************************** func *************************
 # update
 funcUpdate() {
 echo "Updating package information"
@@ -122,7 +134,7 @@ else
 	sudo apk update
 fi
 }
-# find_ver
+# findver
 funcFindVer() {
 echo "Check the version of Libgpiod in the repository"
 if [ $ID_OS != "alpine" ]; then
@@ -152,34 +164,35 @@ funcCheckVer() {
 echo "Check:"
 gpiodetect --version
 }
-
-# if not hidden library installation, then showing selection menu
+# *********************************************************
+# ************************** show *************************
+echo "==============================================="
+echo "Libgpiod library installation"
+echo -e "The latest version of the Libgpiod library is \033[1;32m 2.0.2 \033[0m"
+echo "==============================================="
+# *********************************************************
+# *************** checking input parameters ***************
+# TYPE_SETUP
+# LIB_VERSION
+# CAN_SELECT
+# INSTALL_PATH
+# BUILD_ARG
+# ARTIFACT
+# *********
+# TYPE_SETUP
 if [ -z $TYPE_SETUP ]; then
-	echo "==============================================="
-	echo "Libgpiod library installation"
-	echo -e "The latest version of the Libgpiod library is \033[1;32m 2.0.2 \033[0m"
-	echo "==============================================="
-	NUMBER_STEPS=4
-	# TYPE_SETUP
-	PS3="1/${NUMBER_STEPS}. Choose the type of Libgpiod library installation. Please enter your choice (recommended: 4): "
+	PS3="Choose the type of Libgpiod library installation. Please enter your choice (recommended: 4): "
 	options=("Check the version in the repository" "Installation from repository" "Install from source" "Installation from binaries" "Quit")
 	select opt in "${options[@]}"
 	do
 		case $opt in
 			"Check the version in the repository")
-				TYPE_SETUP="find_ver"
-				funcUpdate
-				funcFindVer
-				echo "Successfully"	
-				exit 0;
+				TYPE_SETUP="findver"
+				break;
 				;;
 			"Installation from repository")
 				TYPE_SETUP="repo"
-				funcUpdate
-				funcRepo
-				funcCheckVer
-				echo "Successfully"	
-				exit 0;
+				break;
 				;;
 			"Install from source")
 				TYPE_SETUP="source"
@@ -187,7 +200,6 @@ if [ -z $TYPE_SETUP ]; then
 				;;
 			"Installation from binaries")
 				TYPE_SETUP="binary"
-				NUMBER_STEPS=3
 				break;
 				;;
 			"Quit")
@@ -197,153 +209,131 @@ if [ -z $TYPE_SETUP ]; then
 		esac
 	done
 	echo "You choosed: $TYPE_SETUP" 
-	
-	# LIB_VERSION
-	PS3="2/${NUMBER_STEPS}. Select version of Libgpiod library. Please enter your choice (recommended: 1): "
-	options=('2.0.2' '2.0.1' '2.0' '1.6.4' '1.6.3' 'Quit')
-	select opt in "${options[@]}"
-	do
-		case $opt in
-			'2.0.2')
-				LIB_VERSION="2.0.2"
-				break;
-				;;		
-			'2.0.1')
-				LIB_VERSION="2.0.1"
-				break;
-				;;
-			'2.0')
-				LIB_VERSION="2.0"
-				break;
-				;;
-			'1.6.4')
-				LIB_VERSION="1.6.4"
-				break;
-				;;
-			'1.6.3')
-				LIB_VERSION="1.6.3"
-				break;
-				;;
-			'Quit')
-				exit 0;
-				;;
-			*) echo "invalid option $REPLY";;
-		esac
-	done
-	echo "You choosed: ${LIB_VERSION}"
-	if [ $TYPE_SETUP == "source" ]; then
-		# INSTALL_PATH
-		read -e -p "3/${NUMBER_STEPS}. Set installation path [/usr/share/libgpiod]: " -i "/usr/share/libgpiod" INSTALL_PATH
-		if [ -z $INSTALL_PATH ]; then
-			INSTALL_PATH=/usr/share/libgpiod
-		fi
-		echo "You choosed: ${INSTALL_PATH}"
-		# BUILD_ARG
-		read -e -p "4/${NUMBER_STEPS}. Specify build arguments [--enable-tools=yes --enable-bindings-cxx --enable-bindings-python ac_cv_func_malloc_0_nonnull=yes]: " -i "--enable-tools=yes --enable-bindings-cxx --enable-bindings-python ac_cv_func_malloc_0_nonnull=yes" BUILD_ARG
-		echo "You choosed: ${BUILD_ARG}"
-	fi
 fi
-
-# binary
-if [ $TYPE_SETUP == "binary" ]; then
-	#wget
-	wget --version &>/dev/null || (echo "Updating package information" && sudo apt-get update \
- && sudo apt-get install -y wget)
-	echo "Package search ..."
-	# get list
-	wget -O list.txt "https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/dev/out/list.txt"
-	# select - ARCH_OS, ID_OS, VERSION_OS, LIB_VERSION
-	declare LIST_BIN=$(cat list.txt | grep ${ARCH_OS} | grep ${ID_OS} | \
- grep ${VERSION_OS} | grep "${LIB_VERSION}")
-	LIST_BIN=$(echo "$LIST_BIN" | tr '\n' ' ')
-	IFS=' ' read -r -a options <<< "$LIST_BIN"
-	echo "==============================================="
-	echo "Your OS ${ID_OS} ${VERSION_OS} architecture ${ARCH_OS}"
-	echo "==============================================="
-	# no option
-	# select - ARCH_OS, ID_OS
-	if [ ${#options[@]} == 0 ]; then
-		LIST_BIN=$(cat list.txt | grep ${ARCH_OS} | grep ${ID_OS})
-		LIST_BIN=$(echo "$LIST_BIN" | tr '\n' ' ')
-		IFS=' ' read -r -a options <<< "$LIST_BIN"
-	fi
-	# select - ARCH_OS
-	if [ ${#options[@]} == 0 ]; then
-		LIST_BIN=$(cat list.txt | grep ${ARCH_OS})
-		LIST_BIN=$(echo "$LIST_BIN" | tr '\n' ' ')
-		IFS=' ' read -r -a options <<< "$LIST_BIN"
-	fi
-	# SELECT
-	PS3="3/${NUMBER_STEPS}. Select version of Libgpiod library. Please enter your choice: "
-	echo "Library versions:"
-	select opt in "${options[@]}"
-		do
-			FILENAME_BIN=$opt
-			echo "You choosed: ${FILENAME_BIN}"
-			break;
-		done
-fi
-
-# defining default values
-if [ -z $TYPE_SETUP ]; then
-	TYPE_SETUP="source"
-fi
-
-if [ -z $INSTALL_PATH ]; then
-	INSTALL_PATH="/usr/share/libgpiod"
-fi
-
+# LIB_VERSION
 if [ -z $LIB_VERSION ]; then
-	LIB_VERSION="2.0.2"
+	if [ $TYPE_SETUP == "binary" ] || [ $TYPE_SETUP == "source" ]; then
+		if [ -z $FILENAME_BIN ]; then
+			PS3="Select version of Libgpiod library. Please enter your choice (recommended: 1): "
+			options=('2.0.2' '2.0.1' '2.0' '1.6.4' '1.6.3' 'Quit')
+			select opt in "${options[@]}"
+			do
+				case $opt in
+					'2.0.2')
+						LIB_VERSION="2.0.2"
+						break;
+						;;		
+					'2.0.1')
+						LIB_VERSION="2.0.1"
+						break;
+						;;
+					'2.0')
+						LIB_VERSION="2.0"
+						break;
+						;;
+					'1.6.4')
+						LIB_VERSION="1.6.4"
+						break;
+						;;
+					'1.6.3')
+						LIB_VERSION="1.6.3"
+						break;
+						;;
+					'Quit')
+						exit 0;
+						;;
+					*) echo "invalid option $REPLY";;
+				esac
+			done
+			echo "You choosed: ${LIB_VERSION}"
+		fi
+	fi
 fi
-
-if [ "${BUILD_ARG}" == "" ]; then
-	BUILD_ARG="--enable-tools=yes --enable-bindings-cxx \
---enable-bindings-python ac_cv_func_malloc_0_nonnull=yes"
-	# lib 2.0.2 2.0.1 2.0 in ubuntu 20.04, 18.04 - not support python
-	if [ "${LIB_VERSION}" == "2.0.2" ] || [ "${LIB_VERSION}" == "2.0.1" ] || [ "${LIB_VERSION}" == "2.0" ]; then
-		if [ $ID_OS == "ubuntu" ]; then
-			if [ "${VERSION_OS}" == "20.04" ]; then
-				#
-				BUILD_ARG="--enable-tools=yes --enable-bindings-cxx ac_cv_func_malloc_0_nonnull=yes"
-				END_NAME_ARTIFACT="-without_support_python"
-				echo "WARNING! $ID_OS ${VERSION_OS} builds libgpiod without PYTHON support."
-				#
-			fi
-			if [ "${VERSION_OS}" == "18.04" ]; then
-				#
-				BUILD_ARG="--enable-tools=yes ac_cv_func_malloc_0_nonnull=yes"
-				END_NAME_ARTIFACT="-without_support_python_and_cxx"
-				echo "WARNING! $ID_OS ${VERSION_OS} builds libgpiod without PYTHON and C++ support."
-				#
+# CAN_SELECT
+if [ -z $CAN_SELECT ]; then
+	if [ $TYPE_SETUP == "binary" ]; then
+		CAN_SELECT="yes"
+	fi
+fi
+# INSTALL_PATH
+if [ -z $INSTALL_PATH ]; then
+	if [ $TYPE_SETUP == "source" ]; then
+		INSTALL_PATH=/usr/share/libgpiod
+	fi
+fi
+# BUILD_ARG
+if [ -z $BUILD_ARG ]; then
+	if [ $TYPE_SETUP == "source" ]; then
+		BUILD_ARG="--enable-tools=yes --enable-bindings-cxx \
+		--enable-bindings-python ac_cv_func_malloc_0_nonnull=yes"
+		# lib 2.0.2 2.0.1 2.0 in ubuntu 20.04, 18.04 - not support python
+		if [ "${LIB_VERSION}" == "2.0.2" ] || [ "${LIB_VERSION}" == "2.0.1" ] || [ "${LIB_VERSION}" == "2.0" ]; then
+			if [ $ID_OS == "ubuntu" ]; then
+				if [ "${VERSION_OS}" == "20.04" ]; then
+					#
+					BUILD_ARG="--enable-tools=yes --enable-bindings-cxx ac_cv_func_malloc_0_nonnull=yes"
+					END_NAME_ARTIFACT="-without_support_python"
+					echo "WARNING! $ID_OS ${VERSION_OS} builds libgpiod without PYTHON support."
+					#
+				fi
+				if [ "${VERSION_OS}" == "18.04" ]; then
+					#
+					BUILD_ARG="--enable-tools=yes ac_cv_func_malloc_0_nonnull=yes"
+					END_NAME_ARTIFACT="-without_support_python_and_cxx"
+					echo "WARNING! $ID_OS ${VERSION_OS} builds libgpiod without PYTHON and C++ support."
+					#
+				fi
 			fi
 		fi
 	fi
 fi
-
+# ARTIFACT
 if [ -z $ARTIFACT ]; then
-	ARTIFACT="no"
+	if [ $TYPE_SETUP == "source" ]; then
+		ARTIFACT="no"
+	fi
 fi
-
-# show
+# *********************************************************
+# ************************** show *************************
 echo "==============================================="
 echo "Libgpiod library installation"
 echo "==============================================="
 echo "Options:"
-echo "Type of instalation: ${TYPE_SETUP}"
-echo "Library installation path: ${INSTALL_PATH}"
-echo "Installing the Libgpiod library version: ${LIB_VERSION}"
-echo "Libgpiod library build arguments: ${BUILD_ARG}"
-echo "Save artifact: ${ARTIFACT}"
 echo "Processor architecture: ${ARCH_OS}"
 echo "OS name: ${ID_OS}"
 echo "OS version: ${VERSION_OS}"
+echo "Type of instalation: ${TYPE_SETUP}"
+if [ "${LIB_VERSION}" != "" ]; then
+	echo "Installing the Libgpiod library version: ${LIB_VERSION}"
+fi
+if [ "${CAN_SELECT}" != "" ]; then
+	echo "Can select: ${CAN_SELECT}"
+fi
+if [ "${INSTALL_PATH}" != "" ]; then
+	echo "Library installation path: ${INSTALL_PATH}"
+	echo "Libgpiod library build arguments: ${BUILD_ARG}"
+	echo "Save artifact: ${ARTIFACT}"
+fi
 echo "==============================================="
 echo ""
 echo "==================== Setup ===================="
-
-# Install from source
-if [ $TYPE_SETUP == "source" ]; then
+# *********************************************************
+# ************************* Install ***********************
+# TYPE_SETUP = "findver", "repo", "source", "binary"
+if [ "${TYPE_SETUP}" == "findver" ]; then
+	funcUpdate
+	funcFindVer
+	echo "==============================================="
+	echo "Successfully"
+	exit 0;
+fi
+# **********
+if [ "${TYPE_SETUP}" == "repo" ]; then
+	funcUpdate
+	funcRepo
+fi
+# **********
+if [ "${TYPE_SETUP}" == "source" ]; then
 	echo "Install Libgpiod from source"
 	funcUpdate
 	# remove
@@ -441,14 +431,59 @@ if [ $TYPE_SETUP == "source" ]; then
 	fi
 	#end block	
 fi
-
-# Installation from binaries
-if [ $TYPE_SETUP == "binary" ]; then
+# **********
+if [ "${TYPE_SETUP}" == "binary" ]; then
+	#wget
+	wget --version &>/dev/null || (echo "Updating package information" && sudo apt-get update \
+ && sudo apt-get install -y wget)
+	echo "Package search ..."
+	# get list
+	wget -O list.txt "https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/dev/out/list.txt"
+	# select - ARCH_OS, ID_OS, VERSION_OS, LIB_VERSION
+	declare LIST_BIN=$(cat list.txt | grep ${ARCH_OS} | grep ${ID_OS} | \
+ grep ${VERSION_OS} | grep "${LIB_VERSION}")
+	LIST_BIN=$(echo "$LIST_BIN" | tr '\n' ' ')
+	IFS=' ' read -r -a options <<< "$LIST_BIN"
+	echo "==============================================="
+	echo "Your OS ${ID_OS} ${VERSION_OS} architecture ${ARCH_OS}"
+	echo "==============================================="
+	if [ -z $FILENAME_BIN ]; then
+		if [ "${CAN_SELECT}" == "yes" ]; then
+			# no option
+			# select - ARCH_OS, ID_OS
+			if [ ${#options[@]} == 0 ]; then
+				LIST_BIN=$(cat list.txt | grep ${ARCH_OS} | grep ${ID_OS})
+				LIST_BIN=$(echo "$LIST_BIN" | tr '\n' ' ')
+				IFS=' ' read -r -a options <<< "$LIST_BIN"
+			fi
+			# select - ARCH_OS
+			if [ ${#options[@]} == 0 ]; then
+				LIST_BIN=$(cat list.txt | grep ${ARCH_OS})
+				LIST_BIN=$(echo "$LIST_BIN" | tr '\n' ' ')
+				IFS=' ' read -r -a options <<< "$LIST_BIN"
+			fi
+			# SELECT
+			PS3="Select version of Libgpiod library. Please enter your choice: "
+			echo "Library versions:"
+			select opt in "${options[@]}"
+				do
+					FILENAME_BIN=$opt
+					break;
+				done
+		else
+			# "no"
+			# select - last item
+			if [ ${#options[@]} != 0 ]; then
+				FILENAME_BIN=${options[-1]}
+			fi	
+		fi
+	fi
 	# defining  value
 	if [ -z $FILENAME_BIN ]; then
 		echo "ERROR. No binary package found for your OS"
 		exit 1;
 	fi
+	echo "Choosed: ${FILENAME_BIN}"
 	# unzip
 	unzip --help &>/dev/null || (echo "Updating package information" && sudo apt-get update \
  && sudo apt-get install -y unzip)
@@ -460,7 +495,7 @@ if [ $TYPE_SETUP == "binary" ]; then
 	rm libgpiod-bin.zip
 	#
 fi
-
+# *********************************************************
 #
 funcCheckVer
 echo "==============================================="
