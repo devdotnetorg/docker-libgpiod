@@ -10,15 +10,15 @@ set -e
 
 echo "Start BUILDX"
 
-#libgpiod: 2.0.2, 2.0.1, 2.0, 1.6.4
-#:ubuntu 23.04, 22.04, 20.04, 18.04
+#libgpiod: 2.1, 2.0.2, 2.0, 1.6.4
+#:ubuntu 23.10, 22.04, 20.04, 18.04
 #:debian 12, 11
-#:alpine 3.18, 3.17, 3.16, 3.15
+#:alpine 3.18, 3.17, 3.16
 
-for LIB_VERSION in 2.0.2, 2.0.1, 2.0, 1.6.4
+for LIB_VERSION in 2.1 2.0.2 2.0 1.6.4
 do
   # ubuntu, debian
-  for IMAGE_VERSION in ubuntu:23.04 ubuntu:22.04 ubuntu:20.04 ubuntu:18.04 debian:12 debian:11
+  for IMAGE_VERSION in ubuntu:23.10 ubuntu:22.04 ubuntu:20.04 ubuntu:18.04 debian:12 debian:11
   do
     #
     declare IMAGE_VERSION_2=$(echo "$IMAGE_VERSION" | tr : -)
@@ -30,7 +30,7 @@ do
     #
   done
   # alpine
-  for IMAGE_VERSION in alpine:3.18 alpine:3.17 alpine:3.16 alpine:3.15
+  for IMAGE_VERSION in alpine:3.18 alpine:3.17 alpine:3.16
   do
     #
     declare IMAGE_VERSION_2=$(echo "$IMAGE_VERSION" | tr : -)
