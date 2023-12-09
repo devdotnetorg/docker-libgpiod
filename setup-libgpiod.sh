@@ -353,6 +353,12 @@ if [ "${TYPE_SETUP}" == "source" ]; then
 		sudo rm -rfv $INSTALL_PATH  
 		echo "${INSTALL_PATH} has been removed"
 	fi
+	# only for ubuntu
+	if [ $ID_OS == "ubuntu" ]; then
+		# for python3
+		sudo apt-get install -y --install-recommends ubuntu-drivers-common
+	fi
+	
 	if [ $ID_OS != "alpine" ]; then
 		# ubuntu, debian
 		sudo apt-get install -y curl wget ca-certificates autoconf automake autoconf-archive libtool pkg-config tar zip gzip
