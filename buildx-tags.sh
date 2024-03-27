@@ -10,7 +10,7 @@ set -e
 
 echo "Start BUILDX"
 
-for LIB_VERSION in 2.1 2.0.2 2.0 1.6.4
+for LIB_VERSION in 1.6.4 2.0 2.0.2 2.1 2.1.1
 do
 	echo "BUILD version: ${LIB_VERSION} Ubuntu 22.04"
 	#Ubuntu 22.04 LTS (Jammy Jellyfish)
@@ -22,33 +22,33 @@ do
     docker buildx build --platform linux/arm,linux/arm64,linux/amd64 -f Dockerfile.ubuntu \
     --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=ubuntu:22.04 \
     -t devdotnetorg/libgpiod:${LIB_VERSION}-ubuntu . --push
-	echo "BUILD version: ${LIB_VERSION} Alpine 3.18"
-	#Alpine 3.18
+	echo "BUILD version: ${LIB_VERSION} Alpine 3.19"
+	#Alpine 3.19
 	#------
 	docker buildx build --platform linux/arm,linux/arm64,linux/amd64 -f Dockerfile.alpine \
-    --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=alpine:3.18 \
-    -t devdotnetorg/libgpiod:${LIB_VERSION}-alpine-3.18 . --push
+    --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=alpine:3.19 \
+    -t devdotnetorg/libgpiod:${LIB_VERSION}-alpine-3.19 . --push
 	#
 	docker buildx build --platform linux/arm,linux/arm64,linux/amd64 -f Dockerfile.alpine \
-    --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=alpine:3.18 \
+    --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=alpine:3.19 \
     -t devdotnetorg/libgpiod:${LIB_VERSION}-alpine . --push
 	#:latest-version
 	docker buildx build --platform linux/arm,linux/arm64,linux/amd64 -f Dockerfile.alpine \
-    --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=alpine:3.18 \
+    --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=alpine:3.19 \
     -t devdotnetorg/libgpiod:${LIB_VERSION} . --push
 done
 
 #:latest
-LIB_VERSION=2.1
+LIB_VERSION=2.1.1
 #
 
 echo "BUILD version: ${LIB_VERSION} :latest"
 docker buildx build --platform linux/arm,linux/arm64,linux/amd64 -f Dockerfile.alpine \
-    --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=alpine:3.18 \
+    --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=alpine:3.19 \
     -t devdotnetorg/libgpiod . --push
 
 # RISC-V (riscv64)
-for LIB_VERSION in 2.1 2.0.2 2.0 1.6.4
+for LIB_VERSION in 1.6.4 2.0 2.0.2 2.1 2.1.1
 do
 	echo "BUILD version: ${LIB_VERSION} riscv64/ubuntu:22.04"
 	#Ubuntu 22.04 LTS (Jammy Jellyfish)
@@ -60,7 +60,7 @@ do
     --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=riscv64/ubuntu:22.04 \
     -t devdotnetorg/libgpiod:${LIB_VERSION}-ubuntu-riscv64 . --push
 	echo "BUILD version: ${LIB_VERSION} riscv64/alpine:edge"
-	#Alpine 3.18
+	#Alpine 3.19
 	#------
 	docker buildx build --platform linux/riscv64 -f Dockerfile.alpine \
     --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=riscv64/alpine:edge \
@@ -72,10 +72,14 @@ do
 done
 
 #:latest-riscv64
-LIB_VERSION=2.1
+LIB_VERSION=2.1.1
 #
 docker buildx build --platform linux/riscv64 -f Dockerfile.alpine \
     --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=riscv64/alpine:edge \
     -t devdotnetorg/libgpiod:${LIB_VERSION}-riscv64 . --push
+
+docker buildx build --platform linux/riscv64 -f Dockerfile.alpine \
+    --build-arg LIB_VERSION=${LIB_VERSION} --build-arg IMAGE_VERSION=riscv64/alpine:edge \
+    -t devdotnetorg/libgpiod:riscv64 . --push
 
 echo "BUILDX END"

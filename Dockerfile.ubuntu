@@ -9,7 +9,7 @@ ARG IMAGE_VERSION="ubuntu:22.04"
 
 # build
 FROM $IMAGE_VERSION as build
-ARG LIB_VERSION="2.0.2"
+ARG LIB_VERSION="2.1.1"
 
 # Install
 RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends sudo
@@ -29,7 +29,7 @@ COPY --from=build /out/* /
 
 # result
 FROM $IMAGE_VERSION as release
-ARG LIB_VERSION="2.0.2"
+ARG LIB_VERSION="2.1.1"
 # Label docker image
 MAINTAINER DevDotNet.Org <anton@devdotnet.org>
 LABEL version="$LIB_VERSION"
