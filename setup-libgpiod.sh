@@ -2,7 +2,7 @@
 # Setup libgpiod for ARM64, ARM32, x86_64, RISC-V
 # C library and tools for interacting with the linux GPIO character device
 # Site: https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git
-# Script version: 4.1
+# Script version: 4.2
 # arguments:
 # 1) -t|--type: installation type;
 #		binary - installation from binaries;
@@ -514,7 +514,9 @@ if [ "${TYPE_SETUP}" == "binary" ]; then
 	wget -O libgpiod-bin.zip "https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/dev/out/${FILENAME_BIN}.zip"
 	# install
 	sudo unzip -o libgpiod-bin.zip -d /usr/
-	rm libgpiod-bin.zip
+	# removing artifacts
+	rm libgpiod-bin.zip &>/dev/null || (echo "The libgpiod-bin.zip file cannot be deleted. Remove it manually.")
+	rm list.txt &>/dev/null || (echo "The list.txt file cannot be deleted. Remove it manually.")
 	#
 fi
 # *********************************************************

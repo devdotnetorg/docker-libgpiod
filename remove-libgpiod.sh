@@ -17,11 +17,12 @@
 set -e
 
 # definition of variables
-declare ARCH_OS=$(uname -m) #aarch64, armv7l, or x86_64
+declare ARCH_OS=$(uname -m) #aarch64, armv7l, x86_64 or riscv64
 declare ID_OS=("$(cat /etc/*release | grep '^ID=' | sed 's/.*=\s*//')") # ubuntu, debian, alpine
 
 # requirements check
-if [ $ARCH_OS != "aarch64" ] && [ $ARCH_OS != "armv7l" ] && [ $ARCH_OS != "x86_64" ]; then
+if [ $ARCH_OS != "aarch64" ] && [ $ARCH_OS != "armv7l" ] \
+ && [ $ARCH_OS != "x86_64" ]&& [ $ARCH_OS != "riscv64" ]; then
 	echo "ERROR. Current OS architecture ${ARCH_OS} is not supported."
 	exit 1;
 fi
@@ -62,6 +63,7 @@ echo "Library installation path:" $INSTALL_PATH
 echo "==============================================="
 echo ""
 echo "===================== Remove ====================="
+echo "Please wait for the end ..."
 
 # Package removal
 if [ $ID_OS != "alpine" ]; then

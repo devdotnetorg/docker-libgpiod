@@ -5,28 +5,27 @@
 * Docker Registry @ [devdotnetorg/libgpiod](https://hub.docker.com/r/devdotnetorg/libgpiod)
 * GitHub @ [devdotnetorg/docker-libgpiod](https://github.com/devdotnetorg/docker-libgpiod)
 
-## Image Tags ##
+## Image Tags
 
-### Linux arm64 Tags ###
+Tags are defined by the mask: `devdotnetorg/libgpiod:<Lib_version>-<OS_name>-<OS_version>`. For example, the image `devdotnetorg/libgpiod:2.1.1-ubuntu-22.04` is built based on Ubuntu version 22.04.
 
-Tags  | Dockerfile  | OS Version  |  Libgpiod Version
-------------- | --  | --  | --
-`:1.6.3-aarch64` `:1.6.3` `:latest` | [Dockerfile](https://github.com/devdotnetorg/docker-libgpiod/blob/master/Dockerfile.alpine) | `alpine:3.13.5` | Latest ([v1.6.3](https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-1.6.3.tar.gz))
-`:1.6.3-focal-aarch64` `:1.6.3-focal` | [Dockerfile](https://github.com/devdotnetorg/docker-libgpiod/blob/master/Dockerfile.focal) | `ubuntu:20.04` | Latest ([v1.6.3](https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-1.6.3.tar.gz))
+Libgpiod library versions: 2.1.1, 2.1, 2.0.2, 2.0, 1.6.4.
 
-### Linux arm32 Tags ###
+Images for the following OS versions are builded:
 
-Tags  | Dockerfile  | OS Version  |  Libgpiod Version
-------------- | --  | --  | --
-`:1.6.3-armhf` `:1.6.3` `:latest` | [Dockerfile](https://github.com/devdotnetorg/docker-libgpiod/blob/master/Dockerfile.alpine) | `alpine:3.13.5` | Latest ([v1.6.3](https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-1.6.3.tar.gz))
-`:1.6.3-focal-armhf` `:1.6.3-focal` | [Dockerfile](https://github.com/devdotnetorg/docker-libgpiod/blob/master/Dockerfile.focal) | `ubuntu:20.04` | Latest ([v1.6.3](https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-1.6.3.tar.gz))
+* Ubuntu: 22.04;
+* Alpine: 3.19.
 
-### Linux amd64 Tags ###
+### Tags for amd64, arm64, arm/v7
 
-Tags  | Dockerfile  | OS Version  |  Libgpiod Version
-------------- | --  | --  | --
-`:1.6.3-amd64` `:1.6.3` `:latest` | [Dockerfile](https://github.com/devdotnetorg/docker-libgpiod/blob/master/Dockerfile.alpine) | `alpine:3.13.5` | Latest ([v1.6.3](https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-1.6.3.tar.gz))
-`:1.6.3-focal-amd64` `:1.6.3-focal` | [Dockerfile](https://github.com/devdotnetorg/docker-libgpiod/blob/master/Dockerfile.focal) | `ubuntu:20.04` | Latest ([v1.6.3](https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-1.6.3.tar.gz))
+* `:latest`, `:2.1.1`, `:2.1.1-alpine`, `:2.1.1-alpine-3.19` - Alpine 3.19, libgpiod ver. 2.1.1;
+* `:2.1.1-ubuntu`, `:2.1.1-ubuntu-22.04` - Ubuntu 22.04, libgpiod ver. 2.1.1.
+
+### Tags for RISC-V (riscv64)
+
+* `:riscv64`, `:2.1.1-riscv64` - Alpine edge, libgpiod ver. 2.1.1;
+* `:2.1.1-ubuntu-riscv64`, `:2.1.1-ubuntu-22.04-riscv64` - Ubuntu 22.04;
+* `:2.1.1-alpine-riscv64`, `:2.1.1-alpine-edge-riscv64` - Alpine edge.
 
 ## Linux kernel GPIO interface
 
@@ -40,7 +39,7 @@ To manage the GPIO registration and allocation there is a framework inside the L
 
 ## Libgpiod
 
-Since Linux version 4.8 the GPIO sysfs interface is deprecated, and now we have a new API based on character devices to access GPIO lines from user space.
+Since linux 4.8 the GPIO sysfs interface is deprecated. User space should use the character device instead. Version 2 of libgpiod requires GPIO character device uAPI v2 which was first released in linux 5.10. This library encapsulates the ioctl calls and data structures behind a straightforward API.
 
 Every GPIO controller (gpiochip) will have a character device in /dev and we can use file operations (open(), read(), write(), ioctl(), poll(), close()) to manage and interact with GPIO lines:
 
@@ -56,15 +55,14 @@ It is possible to configure the state of the pin (open-source, open-drain, etc).
 The polling process to catch events (interrupts from GPIO lines) is reliable.
 
 
-
 Libgpiod (Library General Purpose Input/Output device)  provides both API calls for use in your own programs and the following six user-mode applications to manipulate GPIO lines:
 
-- gpiodetect – list all gpiochips present on the system, their names, labels and number of GPIO lines
-- gpioinfo – list all lines of specified gpiochips, their names, consumers, direction, active state and additional flags
-- gpioget – read values of specified GPIO lines
-- gpioset – set values of specified GPIO lines, potentially keep the lines exported and wait until timeout, user input or signal
-- gpiofind – find the gpiochip name and line offset given the line name
-- gpiomon – wait for events on GPIO lines, specify which events to watch, how many events to process before exiting or if the events should be reported to the console
+- gpiodetect - list all gpiochips present on the system, their names, labels and number of GPIO lines
+- gpioinfo - list lines, their gpiochip, offset, name, and direction, and if in use then the consumer name and any other configured attributes, such as active state, bias, drive, edge detection and debounce period
+- gpioget - read values of specified GPIO lines
+- gpioset - set values of specified GPIO lines, holding the lines until the process is killed or otherwise exits
+- gpiomon - wait for edge events on GPIO lines, specify which edges to watch for, how many events to process before exiting, or if the events should be reported to the console
+- gpionotify - wait for changed to the info for GPIO lines, specify which changes to watch for, how many events to process before exiting, or if the events should be reported to the console
 
 **gpiodetect**
 
@@ -75,7 +73,7 @@ Libgpiod (Library General Purpose Input/Output device)  provides both API calls 
 
  **gpioinfo**
  
-	root@bananapim64:~# gpioinfo 1
+	root@bananapim64:~#  gpioinfo --chip 1
 	gpiochip1 - 256 lines:
 	        line   0:      unnamed       unused   input  active-high
 	...
@@ -96,11 +94,11 @@ Libgpiod (Library General Purpose Input/Output device)  provides both API calls 
 
 **gpiomon**
 
-	root@bananapim64:~# gpiomon 1 38
-	event:  RISING EDGE offset: 38 timestamp: [     122.943878429]
-	event: FALLING EDGE offset: 38 timestamp: [     132.286218099]
-	event:  RISING EDGE offset: 38 timestamp: [     137.639045559]
-	event: FALLING EDGE offset: 38 timestamp: [     138.917400584]
+	root@bananapim64:~# gpiomon --chip 1 38
+	631.682345039   rising  gpiochip1 38
+	632.836326153   falling gpiochip1 38
+	634.400444509   rising  gpiochip1 38
+	635.585806741   falling gpiochip1 38
 
 ## Quick Start
 
@@ -126,17 +124,17 @@ output:
 
 output:
 
-	gpiodetect (libgpiod) v1.6.3
-	Copyright (C) 2017-2018 Bartosz Golaszewski
-	License: LGPLv2.1
+	gpiodetect (libgpiod) v2.1.1
+	Copyright (C) 2017-2023 Bartosz Golaszewski
+	License: GPL-2.0-or-later
 	This is free software: you are free to change and redistribute it.
 	There is NO WARRANTY, to the extent permitted by law.
 
-Running **gpioset**. Turning on LED on Banana Pi M64 (ARM64):
+Running **gpioset**. Turning on LED on Banana Pi M64 (ARM64), hold it for 200ms, then exit:
 
-`docker run --rm --name alpine-test-libgpiod --device /dev/gpiochip1 devdotnetorg/libgpiod gpioset 1 36=1`
+`docker run --rm --name test-libgpiod --device /dev/gpiochip1 devdotnetorg/libgpiod gpioset --banner --hold-period 200ms -t0 --chip 1 36=1`
 
-## Using Libgpiod .so files in containers with a .NET application 
+## Using Libgpiod .so files in containers with a .NET application
 
 To control GPIO from .NET code, the `LibGpiodDriver` class is used, the `System.Device.Gpio.Drivers` namespace. The `LibGpiodDriver` class is a wrapper around the Libgpiod library.
 
@@ -150,61 +148,51 @@ controller = new GpioController(PinNumberingScheme.Logical, drvGpio);
 
 For the `LibGpiodDriver` class to function, the * .so library files must be added to the container.
 
-The container under the path `/ artifacts.zip` contains all the necessary libraries and test programs (gpiodetect, etc.). All you need to do is unpack this archive.
+You must install the Libgpiod library in a container using a script or simply unpack the archive with the binary files.
 
-An example Dockerfile with a C # application using the Libgpiod library:
+An example Dockerfile for Ubuntu 22.04 with a Libgpiod library:
 
 ```
-FROM devdotnetorg/libgpiod:1.6.3 AS sourcelibgpiod
+...
+# Add Libgpiod
+RUN apt-get update \
+	&& apt-get install -y --install-recommends curl \
+	&& curl -SL --output setup-libgpiod.sh https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/dev/setup-libgpiod.sh \
+	&& chmod +x setup-libgpiod.sh \
+	&& ./setup-libgpiod.sh --type binary --version 2.1.1 --canselect no \
+	&& rm setup-libgpiod.sh \
+	&& apt-get -y --purge remove curl unzip
+...
+```
 
-FROM mcr.microsoft.com/dotnet/runtime:5.0-alpine AS base
-WORKDIR /app
+An example Dockerfile for Alpine 3.19 ARM64 with a Libgpiod library:
 
-FROM mcr.microsoft.com/dotnet/sdk:5.0-focal AS build
-WORKDIR /src
-COPY ["src/dotnet-gpioset.csproj", "."]
-RUN dotnet restore "./dotnet-gpioset.csproj"
-COPY /src/. .
-WORKDIR "/src/."
-RUN dotnet build "dotnet-gpioset.csproj" -c Release -o /app/build
-
-FROM build AS publish
-RUN dotnet publish "dotnet-gpioset.csproj" -c Release -o /app/publish
-
-FROM base AS final
-MAINTAINER DevDotNet.Org <anton@devdotnet.org>
-LABEL maintainer="DevDotNet.Org <anton@devdotnet.org>"
-WORKDIR /app
-COPY --from=publish /app/publish .
-# Get libgpiod
-COPY --from=sourcelibgpiod /artifacts.zip /
-
+```
+...
 # Add Libgpiod
 RUN apk update \
-	&& apk add --no-cache --upgrade zip \
-	&& unzip -o /artifacts.zip -d / \
-	&& apk del zip \
-	&& rm /artifacts.zip
-
-ENTRYPOINT ["dotnet", "dotnet-gpioset.dll"]
+	&& export FILENAME_BIN=libgpiod-bin-2.1.1-alpine-3.19-aarch64 \
+	&& apk add --no-cache wget unzip \
+	&& wget -O libgpiod-bin.zip "https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/dev/out/${FILENAME_BIN}.zip" \
+	&& unzip -o libgpiod-bin.zip -d /usr/ \
+	&& rm libgpiod-bin.zip \
+	&& apk del wget unzip
+...
 ```
 
 ## Bash scripts to install the library for Armbian/Ubuntu
 
-To install the latest current version, you need to run the installation script, which will take the latest version of the library from the source repository. In the line for calling the setup script [setup-libgpiod-arm64.sh](https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/master/setup-libgpiod-armv7-and-arm64.sh), specify the library version number as the first parameter (for example: 1.6.3), the second parameter (optional) is the script installation folder. By default, the library will be installed in the path: /usr/share/libgpiod.
-
-Installation script from the source code of libgpiod library and utilities for ARM32 / ARM64:
+Installation script of libgpiod library and utilities for x86/ARM32/ARM64/RISC-V:
 
 ```bash
-cd ~/
 sudo apt-get update
 sudo apt-get install -y curl
-curl -SL --output setup-libgpiod-armv7-and-arm64.sh https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/master/setup-libgpiod-armv7-and-arm64.sh
-chmod +x setup-libgpiod-armv7-and-arm64.sh
-sudo ./setup-libgpiod-armv7-and-arm64.sh 1.6.3
+curl -SL --output setup-libgpiod.sh https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/dev/setup-libgpiod.sh
+chmod +x setup-libgpiod.sh
+sudo ./setup-libgpiod.sh
 ```
 
-To remove the library, execute the script: [remove-libgpiod-armv7-and-arm64.sh](https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/master/remove-libgpiod-armv7-and-arm64.sh).
+To remove the library, execute the script: [remove-libgpiod.sh](https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/dev/remove-libgpiod.sh).
 
 If, as a result of the script execution, the inscription "Successfully" appears, then the library and utilities have been successfully installed.
 
@@ -215,11 +203,11 @@ If, as a result of the script execution, the inscription "Successfully" appears,
 
 - [Weather station on Banana Pi M64 (Linux, C#, Docker, RabbitMQ, AvaloniaUI)(RU)](https://habr.com/ru/company/timeweb/blog/569748/)
 
-- [Linux kernel GPIO user space interface — Sergio Prado embeddedbits.org](https://embeddedbits.org/new-linux-kernel-gpio-user-space-interface/)
+- [Linux kernel GPIO user space interface — Sergio Prado sergioprado.blog](https://sergioprado.blog/new-linux-kernel-gpio-user-space-interface/)
 
 - [An Introduction to chardev GPIO and Libgpiod on the Raspberry PI — Craig Peacock BeyondLogic](https://www.beyondlogic.org/an-introduction-to-chardev-gpio-and-libgpiod-on-the-raspberry-pi/)
 
-- [Manage GPIO lines with gpiod — Sergio Tanzilli acmesystems.it](https://devdotnet.org/post/rabota-s-gpio-v-linux-chast-6-biblioteka-libgpiod/)
+- [Manage GPIO lines with gpiod — Sergio Tanzilli acmesystems.it](https://www.acmesystems.it/gpiod/)
 
 ## License ##
 
