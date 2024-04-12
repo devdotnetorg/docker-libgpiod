@@ -2,7 +2,7 @@
 # Setup libgpiod for ARM64, ARM32, x86_64, RISC-V
 # C library and tools for interacting with the linux GPIO character device
 # Site: https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git
-# Script version: 4.2
+# Script version: 4.3
 # arguments:
 # 1) -t|--type: installation type;
 #		binary - installation from binaries;
@@ -470,20 +470,27 @@ if [ "${TYPE_SETUP}" == "binary" ]; then
 	echo "Your OS ${ID_OS} ${VERSION_OS} architecture ${ARCH_OS}"
 	echo "==============================================="
 	if [ -z $FILENAME_BIN ]; then
+		echo "WARNING. The required version of the library was not found for your OS. Options will be offered ..."
+		# no option
+		# select - ARCH_OS, LIB_VERSION, ID_OS
+		if [ ${#options[@]} == 0 ]; then
+			LIST_BIN=$(cat list.txt | grep ${ARCH_OS} | grep ${LIB_VERSION} | grep ${ID_OS})
+			LIST_BIN=$(echo "$LIST_BIN" | tr '\n' ' ')
+			IFS=' ' read -r -a options <<< "$LIST_BIN"
+		fi
+		# select - ARCH_OS, LIB_VERSION
+		if [ ${#options[@]} == 0 ]; then
+			LIST_BIN=$(cat list.txt | grep ${ARCH_OS} | grep ${LIB_VERSION})
+			LIST_BIN=$(echo "$LIST_BIN" | tr '\n' ' ')
+			IFS=' ' read -r -a options <<< "$LIST_BIN"
+		fi
+		# select - ARCH_OS
+		if [ ${#options[@]} == 0 ]; then
+			LIST_BIN=$(cat list.txt | grep ${ARCH_OS})
+			LIST_BIN=$(echo "$LIST_BIN" | tr '\n' ' ')
+			IFS=' ' read -r -a options <<< "$LIST_BIN"
+		fi
 		if [ "${CAN_SELECT}" == "yes" ]; then
-			# no option
-			# select - ARCH_OS, ID_OS
-			if [ ${#options[@]} == 0 ]; then
-				LIST_BIN=$(cat list.txt | grep ${ARCH_OS} | grep ${ID_OS})
-				LIST_BIN=$(echo "$LIST_BIN" | tr '\n' ' ')
-				IFS=' ' read -r -a options <<< "$LIST_BIN"
-			fi
-			# select - ARCH_OS
-			if [ ${#options[@]} == 0 ]; then
-				LIST_BIN=$(cat list.txt | grep ${ARCH_OS})
-				LIST_BIN=$(echo "$LIST_BIN" | tr '\n' ' ')
-				IFS=' ' read -r -a options <<< "$LIST_BIN"
-			fi
 			# SELECT
 			PS3="Select version of Libgpiod library. Please enter your choice: "
 			echo "Library versions:"
