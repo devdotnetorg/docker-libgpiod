@@ -1,42 +1,51 @@
-########################
+##########################################
 # Image Alpine with libgpiod
-# C library and tools for interacting with the linux GPIO character device
-########################
+# C library and tools for interacting with
+# the linux GPIO character device
+# Site: https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git
+##########################################
 
-FROM alpine:3.13.5 as prep
+ARG IMAGE_VERSION="alpine:3.19"
 
-ARG LIBGPIOD_VERSION=1.6.3
+# build
+FROM $IMAGE_VERSION as build
+ARG LIB_VERSION="2.1.1"
 
-RUN apk update && apk upgrade
-RUN apk add curl autoconf automake autoconf-archive libtool pkgconfig tar zip
-RUN apk add gawk mawk build-base gcc make g++ zlib-dev linux-headers
+# Install
+RUN apk update && apk upgrade --available && apk add --no-cache --upgrade sudo bash
 
-RUN mkdir -p /libgpiod \
-	&& cd /libgpiod \
-	&& curl -SL --output libgpiod.tar.gz https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-$LIBGPIOD_VERSION.tar.gz \
-	&& tar -ozxf libgpiod.tar.gz -C /libgpiod \
-	&& rm libgpiod.tar.gz \
-	&& cd /libgpiod/libgpiod-$LIBGPIOD_VERSION \
-	&& mkdir -p /usr/share/libgpiod \
-	&& mkdir -p /usr/share/libgpiod/share \
-	&& chmod +x autogen.sh
-RUN cd /libgpiod/libgpiod-$LIBGPIOD_VERSION \
-	&& ./autogen.sh --enable-tools=yes --prefix=/usr/share/libgpiod ac_cv_func_malloc_0_nonnull=yes \
-	&& make \
-	&& make install
-#
-RUN cp /usr/share/libgpiod/bin/gpio* /usr/bin/ \
-	&& cp /usr/share/libgpiod/lib/libgpiod* /usr/lib/ \
-	&& zip -r9 /artifacts.zip /usr/bin/gpio* /usr/lib/libgpiod*
-FROM alpine:3.13.5
+# Copy to image
+COPY setup-libgpiod.sh /
+RUN chmod +x /setup-libgpiod.sh \
+	&& /setup-libgpiod.sh --type source --path /usr/share/libgpiod --version ${LIB_VERSION} --artifact yes
+
+# out
+FROM scratch as artifact
+COPY --from=build /out/* /
+
+# result
+FROM $IMAGE_VERSION as release
+ARG LIB_VERSION="2.1.1"
+# Label docker image
 MAINTAINER DevDotNet.Org <anton@devdotnet.org>
+LABEL version="$LIB_VERSION"
 LABEL maintainer="DevDotNet.Org <anton@devdotnet.org>"
 
-COPY --from=prep /artifacts.zip /
+COPY --from=build /usr/share/libgpiod/artifact.zip /artifact.zip
 
 RUN apk update \
-	&& apk add --no-cache --upgrade zip \
-	&& unzip -o /artifacts.zip -d / \
-	&& apk del zip
+	&& apk upgrade --available \
+	&& apk add --no-cache --upgrade unzip \
+	&& unzip -o /artifact.zip -d /usr/ \
+	&& rm /artifact.zip \
+	&& apk del unzip \
+#Cleaning
+	&& rm -rf /var/lib/{cache,log}/ \
+	&& rm -rf /var/lib/apt/lists/*.lz4 \
+	&& rm -rf /var/log/* \
+	&& rm -rf /tmp/* /var/tmp/* \
+	&& rm -rf /usr/share/doc/ \
+	&& rm -rf /usr/share/man/ \
+	&& rm -rf /var/cache/apk/*
 
 CMD ["/usr/bin/gpioinfo", "-v"]

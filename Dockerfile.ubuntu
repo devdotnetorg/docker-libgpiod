@@ -1,0 +1,56 @@
+##########################################
+# Image Ubuntu with libgpiod
+# C library and tools for interacting with
+# the linux GPIO character device
+# Site: https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git
+##########################################
+
+ARG IMAGE_VERSION="ubuntu:22.04"
+
+# build
+FROM $IMAGE_VERSION as build
+ARG LIB_VERSION="2.1.1"
+
+# Install
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends sudo
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends tzdata \
+	&& dpkg-reconfigure --frontend noninteractive tzdata \
+	&& DEBIAN_FRONTEND=noninteractive apt-get install -y pkg-config
+
+# Copy to image
+COPY setup-libgpiod.sh /
+RUN chmod +x /setup-libgpiod.sh \
+	&& /setup-libgpiod.sh --type source --path /usr/share/libgpiod --version ${LIB_VERSION} --artifact yes
+
+# out
+FROM scratch as artifact
+COPY --from=build /out/* /
+
+# result
+FROM $IMAGE_VERSION as release
+ARG LIB_VERSION="2.1.1"
+# Label docker image
+MAINTAINER DevDotNet.Org <anton@devdotnet.org>
+LABEL version="$LIB_VERSION"
+LABEL maintainer="DevDotNet.Org <anton@devdotnet.org>"
+
+COPY --from=build /usr/share/libgpiod/artifact.zip /artifact.zip
+
+RUN apt-get update \
+	&& apt-get upgrade -y \
+	&& apt-get install -y --no-install-recommends unzip \
+	&& unzip -o /artifact.zip -d /usr/ \
+	&& rm /artifact.zip \
+	&& apt-get remove -y unzip \	
+#Cleaning
+	&& apt-get clean autoclean -y \
+	&& apt-get autoremove -y \
+	&& rm -rf /var/lib/{apt,dpkg,cache,log}/ \
+	&& rm -rf /var/log/* \
+	&& rm -rf /tmp/* /var/tmp/* \
+	&& rm -rf /usr/share/doc/ \
+	&& rm -rf /usr/share/man/ \
+	&& rm -rf /var/lib/apt/lists/*
+
+CMD ["/usr/bin/gpioinfo", "-v"]
