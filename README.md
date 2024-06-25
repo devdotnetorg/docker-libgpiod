@@ -157,7 +157,7 @@ An example Dockerfile for Ubuntu 22.04 with a Libgpiod library:
 # Add Libgpiod
 RUN apt-get update \
 	&& apt-get install -y --install-recommends curl \
-	&& curl -SL --output setup-libgpiod.sh https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/dev/setup-libgpiod.sh \
+	&& curl -SL --output setup-libgpiod.sh https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/HEAD/setup-libgpiod.sh \
 	&& chmod +x setup-libgpiod.sh \
 	&& ./setup-libgpiod.sh --type binary --version 1.6.4 --canselect no \
 	&& rm setup-libgpiod.sh \
@@ -187,12 +187,12 @@ Installation script of libgpiod library and utilities for x86/ARM32/ARM64/RISC-V
 ```bash
 sudo apt-get update
 sudo apt-get install -y curl
-curl -SL --output setup-libgpiod.sh https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/setup-libgpiod.sh
+curl -SL --output setup-libgpiod.sh https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/HEAD/setup-libgpiod.sh
 chmod +x setup-libgpiod.sh
 sudo ./setup-libgpiod.sh
 ```
 
-To remove the library, execute the script: [remove-libgpiod.sh](https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/remove-libgpiod.sh).
+To remove the library, execute the script: [remove-libgpiod.sh](https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/HEAD/remove-libgpiod.sh).
 
 If, as a result of the script execution, the inscription "Successfully" appears, then the library and utilities have been successfully installed.
 
