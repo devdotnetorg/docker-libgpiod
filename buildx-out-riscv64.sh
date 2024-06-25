@@ -12,12 +12,12 @@ echo "Start BUILDX"
 
 # RISC-V (riscv64)
 
-#libgpiod: 2.1.1, 2.1, 2.0.2, 2.0, 1.6.4
-#:riscv64/ubuntu 22.04, 20.04
+#libgpiod: 1.6.3, 1.6.4, 2.0.2, 2.1.2
+#:riscv64/ubuntu 20.04, 22.04,
 #:riscv64/debian sid
 #:riscv64/alpine edge
 
-for LIB_VERSION in 1.6.4 2.0 2.0.2 2.1 2.1.1
+for LIB_VERSION in 1.6.3 1.6.4 2.0.2 2.1.2
 do
   # ubuntu, debian
   for IMAGE_VERSION in riscv64/ubuntu:20.04 riscv64/ubuntu:22.04 riscv64/debian:sid

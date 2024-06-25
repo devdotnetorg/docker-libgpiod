@@ -2,14 +2,14 @@
 # Setup libgpiod for ARM64, ARM32, x86_64, RISC-V
 # C library and tools for interacting with the linux GPIO character device
 # Site: https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git
-# Script version: 4.3
+# Script version: 4.5
 # arguments:
 # 1) -t|--type: installation type;
 #		binary - installation from binaries;
 #		source - installation from source;
 #		findver - find out the version in the repository;
 #		repo - installation from the repository.
-# 2) -v|--version: library release number. Only for types 'binary' and 'source'. Options available: '2.1.1' '2.1' '2.0.2' '2.0' '1.6.4' '1.6.3'.
+# 2) -v|--version: library release number. Only for types 'binary' and 'source'. Options available: '2.1.2' '2.0.2' '1.6.4' '1.6.3'.
 # 3) -f|--file: name of the binary file to install. Only for type 'binary'. Source: https://github.com/devdotnetorg/docker-libgpiod/blob/dev/out/list.txt
 # 4) -c|--canselect: selection of build, values: yes, no (default: yes). Only for type 'binary'. 
 # 5) -o|--options: argument string to build the library. Only for type 'source' (default: --enable-tools=yes --enable-bindings-cxx --enable-bindings-python ac_cv_func_malloc_0_nonnull=yes).
@@ -18,7 +18,7 @@
 # 7) -a|--artifact: save artifact after build from source, values: yes, no (default: no). Only for type 'source'.
 #=================================================================
 # Run:	chmod +x setup-libgpiod.sh
-# 		sudo ./setup-libgpiod.sh --type source --path /usr/share/libgpiod --version 2.1.1 --options "--enable-tools=yes --enable-bindings-cxx --enable-bindings-python ac_cv_func_malloc_0_nonnull=yes"
+# 		sudo ./setup-libgpiod.sh --type source --path /usr/share/libgpiod --version 2.1.2 --options "--enable-tools=yes --enable-bindings-cxx --enable-bindings-python ac_cv_func_malloc_0_nonnull=yes"
 # or
 # Run:	chmod +x setup-libgpiod.sh
 # 		sudo ./setup-libgpiod.sh
@@ -168,7 +168,7 @@ gpiodetect --version
 # ************************** show *************************
 echo "==============================================="
 echo "Libgpiod library installation"
-echo -e "The latest version of the Libgpiod library is \033[1;32m 2.1.1 \033[0m"
+echo -e "The latest version of the Libgpiod library is \033[1;32m 2.1.2 \033[0m"
 echo "==============================================="
 # *********************************************************
 # *************** checking input parameters ***************
@@ -215,24 +215,16 @@ if [ -z $LIB_VERSION ]; then
 	if [ $TYPE_SETUP == "binary" ] || [ $TYPE_SETUP == "source" ]; then
 		if [ -z $FILENAME_BIN ]; then
 			PS3="Select version of Libgpiod library. Please enter your choice (recommended: 1): "
-			options=('2.1.1' '2.1' '2.0.2' '2.0' '1.6.4' '1.6.3' 'Quit')
+			options=('2.1.2' '2.0.2' '1.6.4' '1.6.3' 'Quit')
 			select opt in "${options[@]}"
 			do
 				case $opt in
-					'2.1.1')
-						LIB_VERSION="2.1.1"
-						break;
-						;;						
-					'2.1')
-						LIB_VERSION="2.1"
-						break;
-						;;		
-					'2.0.2')
-						LIB_VERSION="2.0.2"
+					'2.1.2')
+						LIB_VERSION="2.1.2"
 						break;
 						;;
-					'2.0')
-						LIB_VERSION="2.0"
+					'2.0.2')
+						LIB_VERSION="2.0.2"
 						break;
 						;;
 					'1.6.4')
@@ -270,8 +262,10 @@ if [ -z $BUILD_ARG ]; then
 	if [ $TYPE_SETUP == "source" ]; then
 		BUILD_ARG="--enable-tools=yes --enable-bindings-cxx \
 		--enable-bindings-python ac_cv_func_malloc_0_nonnull=yes"
-		# lib 2.1.1 2.1 2.0.2 2.0.1 2.0 in ubuntu 20.04, 18.04 - not support python
-		if [ "${LIB_VERSION}" == "2.1.1" ] || [ "${LIB_VERSION}" == "2.1" ] ||  [ "${LIB_VERSION}" == "2.0.2" ] || [ "${LIB_VERSION}" == "2.0.1" ] || [ "${LIB_VERSION}" == "2.0" ]; then
+		# lib 2.1.2 2.1.1 2.1 2.0.2 2.0.1 2.0 in ubuntu 20.04, 18.04 - not support python
+		if [ "${LIB_VERSION}" == "2.1.2" ] || [ "${LIB_VERSION}" == "2.1.1" ] \
+		 || [ "${LIB_VERSION}" == "2.1" ] ||  [ "${LIB_VERSION}" == "2.0.2" ] \
+		 || [ "${LIB_VERSION}" == "2.0.1" ] || [ "${LIB_VERSION}" == "2.0" ]; then
 			if [ $ID_OS == "ubuntu" ]; then
 				if [ "${VERSION_OS}" == "20.04" ]; then
 					#
@@ -289,8 +283,9 @@ if [ -z $BUILD_ARG ]; then
 				fi
 			fi
 		fi
-		# lib 2.1.1 2.1 in debian 11 - not support python
-		if [ "${LIB_VERSION}" == "2.1.1" ] || [ "${LIB_VERSION}" == "2.1" ]; then
+		# lib 2.1.2 2.1.1 2.1 in debian 11 - not support python
+		if [ "${LIB_VERSION}" == "2.1.2" ] || [ "${LIB_VERSION}" == "2.1.1" ] \
+		 || [ "${LIB_VERSION}" == "2.1" ]; then
 			if [ $ID_OS == "debian" ]; then
 				if [ "${VERSION_OS}" == "11.11" ]; then
 					#
@@ -369,7 +364,19 @@ if [ "${TYPE_SETUP}" == "source" ]; then
 		sudo update-ca-certificates
 		sudo apt-get install -y gawk mawk gcc make g++ libclang-dev doxygen help2man linux-headers-generic
 		# python3
-		sudo apt-get install -y --install-recommends python3 python3-dev python3-distutils python3-setuptools python3-venv
+		sudo apt-get install -y --install-recommends python3 python3-dev python3-setuptools python3-venv
+		# Python3-distutils removed in Ubuntu Noble Numbat 24.04
+		if [ $ID_OS == "ubuntu" ]; then
+			if [ "${VERSION_OS}" == "24.04" ]; then
+				#
+				sudo apt-get install -y --install-recommends python3-setuptools
+				#
+			else
+				#
+				sudo apt-get install -y --install-recommends python3-distutils
+				#
+			fi
+		fi
 		# fix python3 path
 		alias python='python3'
 		sudo ln -sf /usr/bin/python3 /usr/bin/python

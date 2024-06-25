@@ -7,25 +7,25 @@
 
 ## Image Tags
 
-Tags are defined by the mask: `devdotnetorg/libgpiod:<Lib_version>-<OS_name>-<OS_version>`. For example, the image `devdotnetorg/libgpiod:2.1.1-ubuntu-22.04` is built based on Ubuntu version 22.04.
+Tags are defined by the mask: `devdotnetorg/libgpiod:<Lib_version>-<OS_name>-<OS_version>`. For example, the image `devdotnetorg/libgpiod:2.1.2-ubuntu-24.04` is built based on Ubuntu version 24.04.
 
-Libgpiod library versions: 2.1.1, 2.1, 2.0.2, 2.0, 1.6.4.
+Libgpiod library versions: 1.6.4, 2.1.2.
 
 Images for the following OS versions are builded:
 
-* Ubuntu: 22.04;
-* Alpine: 3.19.
+* Ubuntu: 24.04;
+* Alpine: 3.20.
 
 ### Tags for amd64, arm64, arm/v7
 
-* `:latest`, `:2.1.1`, `:2.1.1-alpine`, `:2.1.1-alpine-3.19` - Alpine 3.19, libgpiod ver. 2.1.1;
-* `:2.1.1-ubuntu`, `:2.1.1-ubuntu-22.04` - Ubuntu 22.04, libgpiod ver. 2.1.1.
+* `:latest`, `:2.1.2`, `:2.1.2-alpine`, `:2.1.2-alpine-3.20` - Alpine 3.20, libgpiod ver. 2.1.2;
+* `:2.1.2-ubuntu`, `:2.1.2-ubuntu-24.04` - Ubuntu 24.04, libgpiod ver. 2.1.2.
 
 ### Tags for RISC-V (riscv64)
 
-* `:riscv64`, `:2.1.1-riscv64` - Alpine edge, libgpiod ver. 2.1.1;
-* `:2.1.1-ubuntu-riscv64`, `:2.1.1-ubuntu-22.04-riscv64` - Ubuntu 22.04;
-* `:2.1.1-alpine-riscv64`, `:2.1.1-alpine-edge-riscv64` - Alpine edge.
+* `:riscv64`, `:2.1.2-riscv64` - Alpine edge, libgpiod ver. 2.1.2;
+* `:2.1.2-ubuntu-riscv64`, `:2.1.2-ubuntu-22.04-riscv64` - Ubuntu 22.04;
+* `:2.1.2-alpine-riscv64`, `:2.1.2-alpine-edge-riscv64` - Alpine edge.
 
 ## Linux kernel GPIO interface
 
@@ -124,7 +124,7 @@ output:
 
 output:
 
-	gpiodetect (libgpiod) v2.1.1
+	gpiodetect (libgpiod) v2.1.2
 	Copyright (C) 2017-2023 Bartosz Golaszewski
 	License: GPL-2.0-or-later
 	This is free software: you are free to change and redistribute it.
@@ -159,7 +159,7 @@ RUN apt-get update \
 	&& apt-get install -y --install-recommends curl \
 	&& curl -SL --output setup-libgpiod.sh https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/dev/setup-libgpiod.sh \
 	&& chmod +x setup-libgpiod.sh \
-	&& ./setup-libgpiod.sh --type binary --version 2.1.1 --canselect no \
+	&& ./setup-libgpiod.sh --type binary --version 1.6.4 --canselect no \
 	&& rm setup-libgpiod.sh \
 	&& apt-get -y --purge remove curl unzip
 ...
@@ -171,7 +171,7 @@ An example Dockerfile for Alpine 3.19 ARM64 with a Libgpiod library:
 ...
 # Add Libgpiod
 RUN apk update \
-	&& export FILENAME_BIN=libgpiod-bin-2.1.1-alpine-3.19-aarch64 \
+	&& export FILENAME_BIN=libgpiod-bin-1.6.4-alpine-3.19-aarch64 \
 	&& apk add --no-cache wget unzip \
 	&& wget -O libgpiod-bin.zip "https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/dev/out/${FILENAME_BIN}.zip" \
 	&& unzip -o libgpiod-bin.zip -d /usr/ \
@@ -187,12 +187,12 @@ Installation script of libgpiod library and utilities for x86/ARM32/ARM64/RISC-V
 ```bash
 sudo apt-get update
 sudo apt-get install -y curl
-curl -SL --output setup-libgpiod.sh https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/dev/setup-libgpiod.sh
+curl -SL --output setup-libgpiod.sh https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/setup-libgpiod.sh
 chmod +x setup-libgpiod.sh
 sudo ./setup-libgpiod.sh
 ```
 
-To remove the library, execute the script: [remove-libgpiod.sh](https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/dev/remove-libgpiod.sh).
+To remove the library, execute the script: [remove-libgpiod.sh](https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/remove-libgpiod.sh).
 
 If, as a result of the script execution, the inscription "Successfully" appears, then the library and utilities have been successfully installed.
 

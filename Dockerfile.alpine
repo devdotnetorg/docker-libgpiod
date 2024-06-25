@@ -5,11 +5,11 @@
 # Site: https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git
 ##########################################
 
-ARG IMAGE_VERSION="alpine:3.19"
+ARG IMAGE_VERSION="alpine:3.20"
 
 # build
 FROM $IMAGE_VERSION as build
-ARG LIB_VERSION="2.1.1"
+ARG LIB_VERSION="2.1.2"
 
 # Install
 RUN apk update && apk upgrade --available && apk add --no-cache --upgrade sudo bash
@@ -25,7 +25,7 @@ COPY --from=build /out/* /
 
 # result
 FROM $IMAGE_VERSION as release
-ARG LIB_VERSION="2.1.1"
+ARG LIB_VERSION="2.1.2"
 # Label docker image
 MAINTAINER DevDotNet.Org <anton@devdotnet.org>
 LABEL version="$LIB_VERSION"
