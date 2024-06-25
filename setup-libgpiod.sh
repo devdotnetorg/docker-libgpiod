@@ -10,7 +10,7 @@
 #		findver - find out the version in the repository;
 #		repo - installation from the repository.
 # 2) -v|--version: library release number. Only for types 'binary' and 'source'. Options available: '2.1.2' '2.0.2' '1.6.4' '1.6.3'.
-# 3) -f|--file: name of the binary file to install. Only for type 'binary'. Source: https://github.com/devdotnetorg/docker-libgpiod/blob/dev/out/list.txt
+# 3) -f|--file: name of the binary file to install. Only for type 'binary'. Source: https://github.com/devdotnetorg/docker-libgpiod/blob/HEAD/out/list.txt
 # 4) -c|--canselect: selection of build, values: yes, no (default: yes). Only for type 'binary'. 
 # 5) -o|--options: argument string to build the library. Only for type 'source' (default: --enable-tools=yes --enable-bindings-cxx --enable-bindings-python ac_cv_func_malloc_0_nonnull=yes).
 # 6) -p|--path: library installation folder (default: /usr/share/libgpiod). Only for type 'source'.
@@ -467,7 +467,7 @@ if [ "${TYPE_SETUP}" == "binary" ]; then
  && sudo apt-get install -y wget)
 	echo "Package search ..."
 	# get list
-	wget -O list.txt "https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/dev/out/list.txt"
+	wget -O list.txt "https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/HEAD/out/list.txt"
 	# select - ARCH_OS, ID_OS, VERSION_OS, LIB_VERSION
 	declare LIST_BIN=$(cat list.txt | grep ${ARCH_OS} | grep ${ID_OS} | \
  grep ${VERSION_OS} | grep "${LIB_VERSION}")
@@ -525,7 +525,7 @@ if [ "${TYPE_SETUP}" == "binary" ]; then
  && sudo apt-get install -y unzip)
 	echo "Package download ..."
 	# download bin
-	wget -O libgpiod-bin.zip "https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/dev/out/${FILENAME_BIN}.zip"
+	wget -O libgpiod-bin.zip "https://raw.githubusercontent.com/devdotnetorg/docker-libgpiod/HEAD/out/${FILENAME_BIN}.zip"
 	# install
 	sudo unzip -o libgpiod-bin.zip -d /usr/
 	# removing artifacts
