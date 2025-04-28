@@ -6,7 +6,7 @@
 # $ chmod +x buildx-tags.sh
 # $ ./buildx-tags.sh
 
-set -e
+set -e #Exit immediately if a comman returns a non-zero status
 
 echo "Start BUILDX"
 

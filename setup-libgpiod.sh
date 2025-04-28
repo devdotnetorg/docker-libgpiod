@@ -25,7 +25,7 @@
 #=================================================================
 # DevDotNet.ORG <anton@devdotnet.org> MIT License
 
-set -e
+set -e #Exit immediately if a comman returns a non-zero status
 
 # **************** definition of variables ****************
 declare ARCH_OS=$(uname -m) #aarch64, armv7l, x86_64 or riscv64
